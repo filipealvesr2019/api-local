@@ -4,7 +4,7 @@ const express  = require ('express');
 const cors = require('cors'); // Importando o módulo cors
 
 const bodyParser = require('body-parser');
-const port = process.env.PORT || 3003;
+const port = process.env.PORT || 3002;
 const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
