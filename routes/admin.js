@@ -178,4 +178,128 @@ if (!passwordRegex.test(password)) {
 
 
 
+// Função para enviar email de recuperação de senha
+const sendPasswordResetEmail = async (req, res) => {
+  const { email } = req.body;
+
+  // Verificar se o email foi fornecido
+  if (!email) {
+    return res.status(400).json({ message: "O email é obrigatório." });
+  }
+
+  try {
+    // Verificar se o usuário existe no banco de dados
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "Usuário não encontrado." });
+    }
+
+    // Gerar um token de redefinição de senha
+    const resetToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "10m", // Token expira em 1 hora
+    });
+    // Enviar o email de recuperação de senha usando o Postmark
+    const postmarkApiKey = process.env.POSTMARK_API_KEY;
+
+    if (!postmarkApiKey) {
+      console.error(
+        "Chave do Postmark não encontrada. Configure a variável de ambiente POSTMARK_API_KEY."
+      );
+      return; // Ou faça outro tratamento de erro adequado
+    }
+
+    const client = new postmark.ServerClient(postmarkApiKey);
+
+    const resetLink = `http://localhost:5174/reset-password/${resetToken}`;
+
+    await client.sendEmail({
+      From: "ceo@mediewal.com.br",
+      To: email,
+      Subject: "Redefinição de senha",
+      TextBody: `Clique no seguinte link para se registrar: ${resetLink}`,
+
+      HtmlBody: `
+      <div style="width: 100vw; height: 10vh; background-color: black;    display: flex;
+      justify-content: center;
+      align-items: center;">
+            <img src="https://i.ibb.co/B3xYDzG/Logo-mediewal-1.png" alt="" />
+     </div>
+     <div style="display: flex;
+     flex-direction: column;
+     justify-content: center;
+     align-items: center;">
+     <p style=" font-weight: 400;
+     font-size: 1.8rem;
+     text-align: center;
+     margin-top: 5rem;
+
+     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+   }">Você solicitou uma redefinição de senha, clique no botão abaixo para redefinir sua senha:</p>
+     
+   <a href="${resetLink}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px; font-weight: 400; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; font-size: 1.2rem;">Redefinir Senha</a>
+
+     </div>
+   
+  `,
+    });
+    res.status(200).json({
+      message: "Email de recuperação de senha enviado com sucesso.",
+    });
+  } catch (error) {
+    console.error("Erro ao enviar email de recuperação de senha:", error);
+    res.status(500).json({
+      message:
+        "Erro interno do servidor ao enviar email de recuperação de senha.",
+    });
+  }
+};
+
+// Função para redefinir a senha
+const resetPassword = async (req, res) => {
+  const { token, newPassword, confirmPassword } = req.body;
+
+  // Verificar se todas as informações necessárias foram fornecidas
+  if (!token || !newPassword || !confirmPassword) {
+    return res
+      .status(400)
+      .json({ message: "Todos os campos são obrigatórios." });
+  }
+
+  try {
+    // Verificar se as senhas fornecidas coincidem
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: "As senhas não coincidem." });
+    }
+
+    // Tentar verificar e decodificar o token JWT
+    let decodedToken;
+    try {
+      decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) {
+        return res.status(400).json({ message: "O token expirou. Solicite um novo link de redefinição de senha." });
+      }
+      throw error; // Se não for um erro de expiração, lança o erro para o bloco catch global
+    }
+
+    const userId = decodedToken.userId;
+
+    // Hash da nova senha
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Atualizar a senha do usuário no banco de dados
+    await User.updateOne({ _id: userId }, { password: hashedPassword });
+
+    res.status(200).json({ message: "Senha redefinida com sucesso." });
+  } catch (error) {
+    console.error("Erro ao redefinir senha:", error);
+    res
+      .status(500)
+      .json({ message: "Erro interno do servidor ao redefinir senha." });
+  }
+};
+
+router.post("/forgot-password", sendPasswordResetEmail);
+// Rota para redefinir a senha
+router.post('/reset-password/:token',  resetPassword);
 module.exports = router;
