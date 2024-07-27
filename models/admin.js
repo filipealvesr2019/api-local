@@ -19,7 +19,7 @@ const adminSchema = new mongoose.Schema({
     validate: {
       validator: function(value) {
         // Verifica se a senha contém pelo menos uma letra maiúscula, uma letra minúscula, um número e um caractere especial
-        return /(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])/.test(value);
+        return /(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!'{:@#$%^&+,.=)_£}*])/.test(value);
       },
       message: "A senha deve conter pelo menos uma letra maiúscula, uma letra minúscula, um número e um caractere especial.",
     },
@@ -33,6 +33,10 @@ const adminSchema = new mongoose.Schema({
       message: "Digite uma credencial válida!",
     },
   },
+   confirmed: {
+    type: Boolean,
+    default: false,
+  },
   
   loginAttempts: {
     type: Number,
@@ -41,15 +45,9 @@ const adminSchema = new mongoose.Schema({
   lockUntil: {
     type: Number,
   },
-  googleId: {
-    type: String,
-    unique: true, // Garante que apenas um usuário tenha esse ID do Google
-    sparse: true // Permite que outros usuários tenham null ou undefined para este campo
-  }
 });
-
 function validateRole(value) {
-  const allowedRoles = ["administrador","Gerente", "funcionario"];
+  const allowedRoles = ["administrador"];
   return allowedRoles.includes(value);
 }
 adminSchema.methods.comparePassword = async function (gotPassword){
@@ -80,6 +78,6 @@ adminSchema.methods.getJwtToken = function () {
 
 
 
-const User = mongoose.model("Admin", adminSchema);
+const Admin = mongoose.model("Admin", adminSchema);
 
-module.exports = User;
+module.exports = Admin;

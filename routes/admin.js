@@ -61,13 +61,12 @@ router.post('/reset-password/:token',  AuthController.resetPassword);
 
 
 
-
 // Função para enviar e-mail usando Postmark
 const sendEmail = async (email, token) => {
   const client = new postmark.ServerClient(process.env.POSTMARK_API_KEY);
    
   try {
-    const registrationLink = `http://localhost:5173/register/${token}`;
+    const registrationLink = `http://localhost:5174/register/${token}`;
 
     await client.sendEmail({
       From: "ceo@mediewal.com.br",
@@ -176,5 +175,7 @@ if (!passwordRegex.test(password)) {
     res.status(500).json({ success: false, error: "Erro interno do servidor." });
   }
 });
+
+
 
 module.exports = router;

@@ -204,13 +204,7 @@ const loginUser = async (req, res, next) => {
   if (user.role === "administrador") {
     // Lógica para administrador
     // Adicione aqui as ações específicas para o administrador
-  } else if (user.role === "gerente") {
-    // Lógica para gerente
-    // Adicione aqui as ações específicas para o gerente
-  } else if (user.role === "funcionario") {
-    // Lógica para funcionário
-    // Adicione aqui as ações específicas para o funcionário
-  } 
+  }
   // Envie o token para o usuário
   console.log("Enviando token para o usuário");
   sendToken(user, 200, res);
