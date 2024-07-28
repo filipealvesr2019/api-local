@@ -164,5 +164,42 @@ router.post('/add-theme', async (req, res) => {
       res.status(500).send(error.message);
     }
   });
+
+
+// Rota para buscar um tema específico pelo ID
+router.get('/theme/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const theme = await Theme.findById(id);
+
+    if (!theme) {
+      return res.status(404).send('Tema não encontrado');
+    }
+
+    res.send(theme);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
+
+
+
+  // Rota para buscar um e-commerce pelo ID do usuário
+router.get('/ecommerce/user/:clienteId', async (req, res) => {
+  const { clienteId } = req.params;
+
+  try {
+    const ecommerce = await Ecommerce.findOne({ clienteId });
+
+    if (!ecommerce) {
+      return res.status(404).send('E-commerce não encontrado');
+    }
+
+    res.send(ecommerce);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
   
 module.exports = router;

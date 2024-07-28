@@ -26,7 +26,7 @@ router.post("/admin",  registerAdmin); // Use directly from AuthController
 
 router.post("/loginCustumer", loginCustomer); // Use directly from AuthController
 
-router.post("/user",  registerAdmin); // Use directly from AuthController
+router.post("/admin",  registerAdmin); // Use directly from AuthController
 router.get("/user/:id", getUser); // Rota para buscar usuário por ID
 router.put("/user/:id", updateUser); // Rota para atualizar usuário por ID
 router.delete("/user/:id", deleteUser); // Rota para excluir usuário por ID
