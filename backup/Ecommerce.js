@@ -4,7 +4,6 @@ const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
 const Ecommerce = require('../models/Ecommerce');
-const Theme = require('../models/Theme');
 
 
 let currentPort = 3001;
@@ -78,91 +77,5 @@ router.post('/add-domain', async (req, res) => {
     res.status(500).send(error.message);
   }
 });
-// Nova rota para buscar um e-commerce pelo domínio
-router.get('/ecommerce/:dominio', async (req, res) => {
-    const { dominio } = req.params;
-  
-    try {
-      const ecommerce = await Ecommerce.findOne({ dominio });
-  
-      if (!ecommerce) {
-        return res.status(404).send('E-commerce não encontrado');
-      }
-  
-      res.send(ecommerce);
-    } catch (error) {
-      res.status(500).send(error.message);
-    }
-  });
 
-
-// Rota para listar todos os e-commerces
-router.get('/ecommerces', async (req, res) => {
-    try {
-      const ecommerces = await Ecommerce.find();
-      res.send(ecommerces);
-    } catch (error) {
-      res.status(500).send(error.message);
-    }
-  });
-
-
-
-
-
-
-
-
-
-  // Rota para listar todos os temas
-router.get('/themes', async (req, res) => {
-    try {
-      const themes = await Theme.find();
-      res.send(themes);
-    } catch (error) {
-      res.status(500).send(error.message);
-    }
-  });
-  
-  // Rota para adicionar tema a um e-commerce
-  router.post('/ecommerce/:ecommerceId/add-theme', async (req, res) => {
-    const { ecommerceId } = req.params;
-    const { themeId } = req.body;
-  
-    try {
-      const ecommerce = await Ecommerce.findById(ecommerceId);
-      const theme = await Theme.findById(themeId);
-  
-      if (!ecommerce || !theme) {
-        return res.status(404).send('E-commerce ou Tema não encontrado');
-      }
-  
-      ecommerce.theme = theme.theme;
-      await ecommerce.save();
-  
-      res.send(ecommerce);
-    } catch (error) {
-      res.status(500).send(error.message);
-    }
-  });
-  
-
-// Rota para adicionar um novo tema ao banco de dados
-router.post('/add-theme', async (req, res) => {
-    const { name, category, theme } = req.body;
-  
-    const newTheme = new Theme({
-      name,
-      category,
-      theme,
-    });
-  
-    try {
-      await newTheme.save();
-      res.send(newTheme);
-    } catch (error) {
-      res.status(500).send(error.message);
-    }
-  });
-  
 module.exports = router;
