@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
-
 const ThemeSchema = new mongoose.Schema({
   name: { type: String, required: true },
   category: { type: String, required: true },
+  layout: { type: String, required: true }, // 'layout1', 'layout2', etc.
   theme: {
     header: {
       backgroundColor: String,

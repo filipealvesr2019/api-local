@@ -13,7 +13,8 @@ const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const admin = require('./routes/admin');
 const Ecommerce = require('./routes/Ecommerce');
-
+const Customer = require('./routes/Customer');
+const Monthly = require('./routes/subscriptions/basic/monthly');
 
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -39,10 +40,12 @@ app.use((err, req, res, next) => {
 
 app.use('/api', admin);
 app.use('/api', Ecommerce);
+app.use('/api', Customer);
 
 
 
 
+app.use('/api', Monthly);
 
 
 
