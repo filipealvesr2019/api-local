@@ -16,6 +16,8 @@ const Ecommerce = require('./routes/Ecommerce');
 const Customer = require('./routes/Customer');
 const Monthly = require('./routes/subscriptions/basic/monthly');
 const superAdmin = require('./routes/superAdmin');
+const Product = require('./routes/Product');
+
 
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -48,6 +50,7 @@ app.use('/api', Customer);
 
 app.use('/api', Monthly);
 
+app.use('/api', Product);
 
 
 
