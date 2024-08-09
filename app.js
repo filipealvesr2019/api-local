@@ -1,5 +1,4 @@
 require('dotenv').config();
-const { ClerkExpressRequireAuth } = require ('@clerk/clerk-sdk-node')
 const express  = require ('express');
 const cors = require('cors'); // Importando o módulo cors
 
@@ -8,6 +7,7 @@ const port = process.env.PORT || 3002;
 const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+const dotenv = require('dotenv');
 
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
@@ -17,6 +17,11 @@ const Customer = require('./routes/Customer');
 const Monthly = require('./routes/subscriptions/basic/monthly');
 const superAdmin = require('./routes/superAdmin');
 const Product = require('./routes/Product');
+const User = require('./routes/User');
+
+const session = require('express-session');
+const passport = require('passport');
+
 
 
 app.use(bodyParser.json());
@@ -24,22 +29,19 @@ app.use(cookieParser());
 // Configurações e middlewares
 app.use(cors({ origin: "*"}));
 // Use the strict middleware that raises an error when unauthenticated
-app.get(
-  '/api/protected-endpoint',
-  ClerkExpressRequireAuth({
-    // Add options here
-    // See the Middleware options section for more details
-  }),
-  (req, res) => {
-    res.send('vc esta autorisado')
-    res.json(req.auth);
-  }
-);
 
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(401).send('Unauthenticated!');
-});
+// Configuração da sessão
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false
+}));
+
+// Inicialização do Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+
 app.use('/api', superAdmin);
 app.use('/api', admin);
 app.use('/api', Ecommerce);
@@ -51,8 +53,19 @@ app.use('/api', Customer);
 app.use('/api', Monthly);
 
 app.use('/api', Product);
+app.use('/api', User);
 
 
+
+
+dotenv.config();
+require('./passport-config'); // Configuração do Passport
+
+
+
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 
 // Acesso à variável de ambiente MONGODB_URI do arquivo .env
