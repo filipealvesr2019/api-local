@@ -27,7 +27,13 @@ const passport = require('passport');
 app.use(bodyParser.json());
 app.use(cookieParser());
 // Configurações e middlewares
-app.use(cors({ origin: "*"}));
+// app.use(cors({ origin: "*"}));
+
+app.use(cors({
+  origin: "http://localhost:5002", // URL do seu frontend
+  credentials: true // Se você estiver usando cookies ou headers personalizados
+}));
+
 // Use the strict middleware that raises an error when unauthenticated
 
 // Configuração da sessão
