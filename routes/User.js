@@ -28,6 +28,7 @@ router.get('/google', passport.authenticate('google', {
   }
 });
 
+
 // Autenticação Facebook
 router.get('/facebook', passport.authenticate('facebook', { scope: ['email'] }));
 
