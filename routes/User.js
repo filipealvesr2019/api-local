@@ -2,9 +2,10 @@ const router = require('express').Router();
 const passport = require('passport');
 
 // Autenticação Local
-router.post('/login', passport.authenticate('local'), (req, res) => {
-  res.json({ message: 'Logged in', user: req.user });
-});
+router.post('/signin', passport.authenticate('local'), (req, res) => {
+    res.json({ message: 'Logged in', user: req.user });
+  });
+  
 
 // Rota para iniciar a autenticação com Google
 router.get('/google', passport.authenticate('google', {
@@ -24,7 +25,7 @@ router.get('/google', passport.authenticate('google', {
   if (req.isAuthenticated()) {
     res.send('Welcome to your profile page!');
   } else {
-    res.redirect('/login'); // Redirecionar para a página de login se não estiver autenticado
+    res.redirect('/signin'); // Redirecionar para a página de login se não estiver autenticado
   }
 });
 
