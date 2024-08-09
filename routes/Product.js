@@ -30,5 +30,33 @@ router.post('/products', async (req, res) => {
     res.status(500).json({ error: 'Failed to create product.' });
   }
 });
+// Rota para listar todos os produtos com suas variações
+router.get('/products', async (req, res) => {
+    try {
+      const products = await Product.find(); // Busca todos os produtos
+      res.status(200).json(products); // Retorna todos os produtos em formato JSON
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      res.status(500).json({ error: 'Failed to fetch products.' });
+    }
+  });
 
+
+
+
+// Rota para visualizar detalhes de um produto específico
+router.get('/products/:id', async (req, res) => {
+    try {
+      const product = await Product.findById(req.params.id); // Busca o produto pelo ID
+  
+      if (!product) {
+        return res.status(404).json({ error: 'Product not found.' });
+      }
+  
+      res.status(200).json(product); // Retorna o produto em formato JSON
+    } catch (error) {
+      console.error('Error fetching product details:', error);
+      res.status(500).json({ error: 'Failed to fetch product details.' });
+    }
+  });
 module.exports = router;

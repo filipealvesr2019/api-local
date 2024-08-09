@@ -25,7 +25,7 @@ app.use(cookieParser());
 app.use(cors({ origin: "*"}));
 // Use the strict middleware that raises an error when unauthenticated
 app.get(
-  '/protected-endpoint',
+  '/api/protected-endpoint',
   ClerkExpressRequireAuth({
     // Add options here
     // See the Middleware options section for more details
