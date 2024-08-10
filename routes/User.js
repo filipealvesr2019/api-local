@@ -7,8 +7,10 @@ const jwt = require("jsonwebtoken");
 const {
   loginUser,
   registerUser,
+ 
 
 } = require("../controllers/User");
+
 const User = require('../models/User');
 // Middleware para verificar o token
 // Autenticação Local
@@ -26,20 +28,20 @@ router.get('/google', passport.authenticate('google', {
   router.get('/google/callback',
     passport.authenticate('google', { failureRedirect: '/' }),
     (req, res) => {
-      res.send('/profile'); // Redirecione para a página desejada
+      res.send('/'); // Redirecione para a página desejada
     }
   );
   
 
- // Rota de perfil
-router.get('/profile', (req, res) => {
-    if (req.isAuthenticated()) {
-      // Enviar informações do perfil do usuário
-      res.json(req.user);
-    } else {
-      res.status(401).json({ message: 'Unauthorized' });
-    }
-  });
+//  // Rota de perfil
+// router.get('/profile', (req, res) => {
+//     if (req.isAuthenticated()) {
+//       // Enviar informações do perfil do usuário
+//       res.json(req.user);
+//     } else {
+//       res.status(401).json({ message: 'Unauthorized' });
+//     }
+//   });
 
 // Autenticação Facebook
 router.get('/facebook', passport.authenticate('facebook', { scope: ['email'] }));
