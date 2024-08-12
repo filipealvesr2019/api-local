@@ -90,5 +90,11 @@ const isAuthenticated = async (req, res, next) => {
         return res.status(401).json({ message: 'Token de acesso inválido.' });
       }
 };
+const ensureAuthenticated = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect('/login'); // Redireciona para a página de login se não estiver autenticado
+};
 
-module.exports = { isAuthenticated, isAdmin, isManager };
+module.exports = { isAuthenticated, isAdmin, isManager, ensureAuthenticated };

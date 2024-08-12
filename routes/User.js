@@ -12,10 +12,11 @@ const {
 } = require("../controllers/User");
 
 const User = require('../models/User');
+const { ensureAuthenticated } = require('../middleware/middlewares.authMiddleware');
 // Middleware para verificar o token
 // Autenticação Local
 router.post('/signin', passport.authenticate('local'), (req, res) => {
-    res.json({ message: 'Logged in', user: req.user });
+    res.json({ message: 'Logged in', user: req.user,    token: req.authInfo.token });
   });
   
 
@@ -28,11 +29,41 @@ router.get('/google', passport.authenticate('google', {
   router.get('/google/callback',
     passport.authenticate('google', { failureRedirect: '/' }),
     (req, res) => {
-      res.send('/'); // Redirecione para a página desejada
+      // O token gerado estará disponível no req.authInfo
+      res.json({
+        message: 'Login successful',
+        token: req.authInfo.token // Envie o token na resposta
+      });
     }
   );
   
 
+  const ensureAuthenticatedJWT = async (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1]; // Extrai o token do cabeçalho Authorization
+  
+    if (!token) {
+      return res.status(401).json({ message: 'Token não fornecido.' });
+    }
+  
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET); // Decodifica o token
+      const user = await User.findById(decoded.id); // Busca o usuário no banco de dados
+  
+      if (!user) {
+        return res.status(404).json({ message: 'Usuário não encontrado.' });
+      }
+  
+      req.user = user; // Adiciona o usuário autenticado ao req
+      next();
+    } catch (err) {
+      return res.status(401).json({ message: 'Token inválido.' });
+    }
+  };
+  
+  router.get('/rota-protegida', ensureAuthenticatedJWT, (req, res) => {
+    res.json({ message: 'Você está autenticado com JWT!' });
+  });
+  
 //  // Rota de perfil
 // router.get('/profile', (req, res) => {
 //     if (req.isAuthenticated()) {

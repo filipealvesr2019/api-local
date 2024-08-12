@@ -4,6 +4,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
 const User = require('./models/User'); // Seu modelo de usuário
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 passport.use(new LocalStrategy(
   async (email, password, done) => {
@@ -14,67 +15,46 @@ passport.use(new LocalStrategy(
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) return done(null, false, { message: 'Incorrect password' });
 
-      return done(null, user);
+      // Gerar o token JWT
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+        expiresIn: '1h' // Token expira em 1 hora
+      });
+
+      return done(null, user, { token }); // Inclua o token no callback do done
     } catch (err) {
       return done(err);
     }
   }
 ));
+
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: "http://localhost:3002/api/google/callback",
-        scope: ['profile', 'email'] // Certifique-se de que isso está presente e configurado corretamente
-
+    scope: ['profile', 'email']
   }, async (accessToken, refreshToken, profile, done) => {
     try {
-      const user = await User.findOne({ googleId: profile.id });
-      if (user) {
-        console.log('User found:', user); // Log do usuário encontrado
-        return done(null, user);
+      let user = await User.findOne({ googleId: profile.id });
+      if (!user) {
+        user = new User({
+          googleId: profile.id,
+          name: profile.displayName,
+          email: profile.emails[0].value
+        });
+        await user.save();
       }
-      
-      const newUser = new User({
-        googleId: profile.id,
-        name: profile.displayName,
-        email: profile.emails[0].value
+
+      // Gerar o token JWT
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+        expiresIn: '1h'
       });
-      
-      await newUser.save();
-      console.log('New user created:', newUser); // Log do novo usuário criado
-      return done(null, newUser);
+
+      return done(null, user, { token }); // Inclua o token no callback do done
     } catch (err) {
-      console.error('Error during Google authentication:', err); // Log de erro
       return done(err);
     }
-  }));
-  
-
-// passport.use(new FacebookStrategy({
-//   clientID: process.env.FACEBOOK_CLIENT_ID,
-//   clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
-//   callbackURL: "/auth/facebook/callback",
-//   profileFields: ['id', 'displayName', 'emails']
-// }, async (accessToken, refreshToken, profile, done) => {
-//   try {
-//     const user = await User.findOne({ facebookId: profile.id });
-//     if (user) {
-//       return done(null, user);
-//     }
-
-//     const newUser = new User({
-//       facebookId: profile.id,
-//       name: profile.displayName,
-//       email: profile.emails[0].value
-//     });
-
-//     await newUser.save();
-//     return done(null, newUser);
-//   } catch (err) {
-//     return done(err);
-//   }
-// }));
-
+  }
+));
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });
