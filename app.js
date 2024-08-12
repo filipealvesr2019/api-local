@@ -30,7 +30,10 @@ app.use(cookieParser());
 // app.use(cors({ origin: "*"}));
 
 app.use(cors({
-  origin: "http://localhost:5002", // URL do seu frontend
+  origin: [
+    'http://localhost:5002',
+    'http://localhost:5005'
+  ],
   credentials: true // Se você estiver usando cookies ou headers personalizados
 }));
 
