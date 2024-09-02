@@ -8,6 +8,7 @@ const client = new postmark.ServerClient(postmarkKey);
 
 const Customer = require("../models/Customer"); // Importe o modelo do Customer
 
+
 router.post("/signup", async (req, res) => {
   try {
     const {
@@ -95,6 +96,8 @@ router.post("/signup", async (req, res) => {
       .json({ message: "Erro interno do servidor ao criar usuário." });
   }
 });
+
+
 
 
 
