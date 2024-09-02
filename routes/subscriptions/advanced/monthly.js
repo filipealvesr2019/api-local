@@ -21,19 +21,9 @@ router.post("/monthly/subscription/pix/:customerId", async (req, res) => {
     // Find the asaasCustomerId of the customer
     const asaasCustomerId = customer.asaasCustomerId;
 
-    const data = {
-      billingType: 'PIX',
-      discount: { value: 10, dueDateLimitDays: 0 },
-      interest: { value: 2 },
-      fine: { value: 1 },
-      cycle: 'MONTHLY',
-      customer: asaasCustomerId,
-      nextDueDate: '2024-09-02',
-      value: 29.99,
-      description: 'Assinatura Plano basico',
-    };
 
     console.log("Sending request with data:", data);
+
     const token = process.env.ACCESS_TOKEN;
 
     if (!token) {
@@ -41,6 +31,19 @@ router.post("/monthly/subscription/pix/:customerId", async (req, res) => {
       return res.status(401).json({ error: "Access token is missing" });
     }
 
+    const data = {
+      billingType: 'PIX',
+      cycle: 'MONTHLY',
+      customer: asaasCustomerId,
+      nextDueDate: '2024-09-02',
+      value: 29.99,
+      description: 'Assinatura Plano basico',
+      discount: { value: 10, dueDateLimitDays: 0 },
+      interest: { value: 2 },
+      fine: { value: 1 },
+    
+ 
+    };
     const response = await axios.post('https://sandbox.asaas.com/api/v3/subscriptions',
       data,
       {
@@ -88,6 +91,7 @@ router.post("/monthly/subscription/pix/:customerId", async (req, res) => {
     } else {
       res.status(500).json({ error: error.message });
     }
+    
   }
 });
 
