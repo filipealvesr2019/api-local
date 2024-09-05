@@ -8,7 +8,7 @@ const variationSchema = new mongoose.Schema({
 
 const productSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  category: { type: String, required: true, categoryImage: String },
+  category: { type: String, required: true },
   imageUrl: { type: String, required: true },
   price: { type: Number, required: true },
   variations: [variationSchema], // Array de variações
