@@ -188,7 +188,7 @@ router.get('/theme/:id', async (req, res) => {
 
 
   // Rota para buscar um e-commerce pelo ID do usuário
-router.get('/ecommerce/user/:clienteId', async (req, res) => {
+router.get('/ecommerce/admin/:clienteId', async (req, res) => {
   const { clienteId } = req.params;
 
   try {

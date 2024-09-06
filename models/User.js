@@ -2,26 +2,28 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 const { isEmail } = require("validator");
-const Schema = mongoose.Schema;
 
-const UserSchema = new Schema({
-  email: { type: String, required: true, unique: true },
+const adminSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: [true, "Digite um email válido!"],
+    lowercase: true,
+    unique:true,
+    validate: [isEmail, "Digite um email válido"],
+  },
   password: {
     type: String,
+    required: [true, "Digite uma senha"],
+    minLength: [10, "Digite uma senha de no mínimo 10 caracteres"],
+    select: false,
     validate: {
-      validator: function (value) {
+      validator: function(value) {
         // Verifica se a senha contém pelo menos uma letra maiúscula, uma letra minúscula, um número e um caractere especial
-        return /(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!'{:@#$%^&+,.=)_£}*])/.test(
-          value
-        );
+        return /(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!'{:@#$%^&+,.=)_£}*])/.test(value);
       },
-      message:
-        "A senha deve conter pelo menos uma letra maiúscula, uma letra minúscula, um número e um caractere especial.",
+      message: "A senha deve conter pelo menos uma letra maiúscula, uma letra minúscula, um número e um caractere especial.",
     },
   },
-  googleId: { type: String },
-  facebookId: { type: String },
-  name: { type: String },
 
   role: {
     type: String,
@@ -31,11 +33,11 @@ const UserSchema = new Schema({
       message: "Digite uma credencial válida!",
     },
   },
-  confirmed: {
+   confirmed: {
     type: Boolean,
     default: false,
   },
-
+  
   loginAttempts: {
     type: Number,
     default: 0,
@@ -44,30 +46,38 @@ const UserSchema = new Schema({
     type: Number,
   },
 });
-
 function validateRole(value) {
-  const allowedRoles = ["user"];
+  const allowedRoles = ["User"];
   return allowedRoles.includes(value);
 }
+adminSchema.methods.comparePassword = async function (gotPassword){
+  return await bcrypt.compare(gotPassword, this.password)
+}
 
-UserSchema.methods.comparePassword = async function (gotPassword) {
-  return await bcrypt.compare(gotPassword, this.password);
-};
 
 // criptografando a senha antes de salva o email e senha do usuario
-UserSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) {
-    next();
+adminSchema.pre('save', async function(next){
+  if(!this.isModified("password")){
+      next()
   }
 
-  this.password = await bcrypt.hash(this.password, 10);
-});
+  this.password = await bcrypt.hash(this.password, 10)
+})
 
 // JWT token
-UserSchema.methods.getJwtToken = function () {
-  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_DURATION,
+adminSchema.methods.getJwtToken = function () {
+  return jwt.sign({id:this._id}, process.env.JWT_SECRET, {
+      expiresIn:process.env.JWT_DURATION
   });
-};
+}
 
-module.exports = mongoose.model("User", UserSchema);
+
+
+
+
+
+
+
+const Admin = mongoose.model("User", adminSchema);
+
+module.exports = Admin;
