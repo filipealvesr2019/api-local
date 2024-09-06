@@ -1,28 +1,49 @@
 const express = require("express");
 const Cart = require("../models/cart/cart");
-const product = require("../models/products/product");
+const Product = require("../models/products/product");
 const Customer = require("../models/Customer");
 const router = express.Router();
+const { ObjectId } = require('mongoose').Types;
 
-router.post("/cart/:customerId", async (req, res) => {
+router.post("/cart/:customerId/:productId", async (req, res) => {
   try {
-    const customer = await Customer.findById({
-      customerId: req.params.customerId,
-    });
-    const { name, category, price, imageUrl, variations } = req.body;
-    const product = await product;
+    const { customerId, productId } = req.params;
+
+    // Verifique se o customerId e o productId são válidos
+    if (!ObjectId.isValid(customerId) || !ObjectId.isValid(productId)) {
+      return res.status(400).json({ error: "Invalid customer ID or product ID" });
+    }
+
+    // Buscar cliente no banco de dados
+    const customer = await Customer.findOne({ customerId: customerId });
+    if (!customer) {
+      return res.status(404).json({ error: "Customer not found" });
+    }
+
+    // Buscar produto no banco de dados
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    // Criar novo pedido
     const newOrder = new Cart({
-      customerId: customer,
+      customerId: customer._id,
       name: product.name,
       category: product.category,
       price: product.price,
       imageUrl: product.imageUrl,
-      variations: product.variations, // A variação deve seguir o formato definido no schema
+      variations: product.variations,
     });
 
-    newOrder.save();
+    // Salvar pedido no banco de dados
+    await newOrder.save();
+
+    res.status(201).json({ message: "Order created successfully", order: newOrder });
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    res.status(500).json({ error: "An error occurred while creating the order" });
   }
 });
+
 module.exports = router;

@@ -18,6 +18,7 @@ const Monthly = require('./routes/subscriptions/basic/monthly');
 const superAdmin = require('./routes/superAdmin');
 const Product = require('./routes/Product');
 const User = require('./routes/User');
+const cart = require('./routes/cart');
 
 const session = require('express-session');
 const passport = require('passport');
@@ -65,6 +66,7 @@ app.use('/api', Monthly);
 
 app.use('/api', Product);
 app.use('/api', User);
+app.use('/api', cart);
 
 
 
