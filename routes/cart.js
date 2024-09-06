@@ -4,10 +4,10 @@ const Product = require("../models/products/product");
 const Customer = require("../models/Customer");
 const router = express.Router();
 const { ObjectId } = require('mongoose').Types;
-
 router.post("/cart/:customerId/:productId", async (req, res) => {
   try {
     const { customerId, productId } = req.params;
+    const { variations } = req.body; // Array de variações
 
     // Verifique se o customerId e o productId são válidos
     if (!ObjectId.isValid(customerId) || !ObjectId.isValid(productId)) {
@@ -26,14 +26,14 @@ router.post("/cart/:customerId/:productId", async (req, res) => {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    // Criar novo pedido
+    // Criar novo pedido com as variações fornecidas
     const newOrder = new Cart({
       customerId: customer._id,
       name: product.name,
       category: product.category,
       price: product.price,
       imageUrl: product.imageUrl,
-      variations: product.variations,
+      variations: variations, // Array de variações
     });
 
     // Salvar pedido no banco de dados
@@ -45,5 +45,6 @@ router.post("/cart/:customerId/:productId", async (req, res) => {
     res.status(500).json({ error: "An error occurred while creating the order" });
   }
 });
+
 
 module.exports = router;
