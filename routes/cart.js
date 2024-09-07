@@ -7,7 +7,7 @@ const { ObjectId } = require('mongoose').Types;
 router.post("/cart/:customerId/:productId", async (req, res) => {
   try {
     const { customerId, productId } = req.params;
-    const { variations } = req.body; // Array de variações
+    const { variations, quantity } = req.body; // Array de variações
 
     // Verifique se o customerId e o productId são válidos
     if (!ObjectId.isValid(customerId) || !ObjectId.isValid(productId)) {
@@ -26,6 +26,18 @@ router.post("/cart/:customerId/:productId", async (req, res) => {
       return res.status(404).json({ error: "Product not found" });
     }
 
+    // Verificar se o quantity é um número válido
+    if(isNaN(quantity) || quantity <= 0){
+      return res.status(400).json({error: 'Invalid quantity'})
+    }
+    let variationTotal = 0;
+    if(variations && Array.isArray(variations)){
+      variationTotal = variations.reduce((sum, variation) => {
+        return sum + (variation. price || 0)
+      }, 0)
+    }
+    let total = product.price * quantity;
+    let totalAmount = total + variationTotal
     // Criar novo pedido com as variações fornecidas
     const newOrder = new Cart({
       customerId: customer._id,
@@ -33,6 +45,8 @@ router.post("/cart/:customerId/:productId", async (req, res) => {
       category: product.category,
       price: product.price,
       imageUrl: product.imageUrl,
+      quantity: quantity,
+      totalAmount: totalAmount,
       variations: variations, // Array de variações
     });
 
