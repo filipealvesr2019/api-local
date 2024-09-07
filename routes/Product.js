@@ -43,7 +43,19 @@ router.get('/products', async (req, res) => {
     }
   });
 
-
+// Rota para obter os detalhes de um produto pelo ID
+router.get('/product/:id', async (req, res) => {
+  try {
+      const product = await Product.findById(req.params.id); // Busca o produto pelo ID
+      if (!product) {
+          return res.status(404).json({ error: 'Product not found' });
+      }
+      res.status(200).json(product); // Retorna os detalhes do produto em formato JSON
+  } catch (error) {
+      console.error('Error fetching product details:', error);
+      res.status(500).json({ error: 'Failed to fetch product details.' });
+  }
+});
 
 
 // Rota para visualizar detalhes de um produto específico
