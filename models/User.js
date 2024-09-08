@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 const { isEmail } = require("validator");
 
-const adminSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: [true, "Digite um email válido!"],
@@ -50,13 +50,13 @@ function validateRole(value) {
   const allowedRoles = ["User"];
   return allowedRoles.includes(value);
 }
-adminSchema.methods.comparePassword = async function (gotPassword){
+userSchema.methods.comparePassword = async function (gotPassword){
   return await bcrypt.compare(gotPassword, this.password)
 }
 
 
 // criptografando a senha antes de salva o email e senha do usuario
-adminSchema.pre('save', async function(next){
+userSchema.pre('save', async function(next){
   if(!this.isModified("password")){
       next()
   }
@@ -65,7 +65,7 @@ adminSchema.pre('save', async function(next){
 })
 
 // JWT token
-adminSchema.methods.getJwtToken = function () {
+userSchema.methods.getJwtToken = function () {
   return jwt.sign({id:this._id}, process.env.JWT_SECRET, {
       expiresIn:process.env.JWT_DURATION
   });
@@ -78,6 +78,6 @@ adminSchema.methods.getJwtToken = function () {
 
 
 
-const Admin = mongoose.model("User", adminSchema);
+const User = mongoose.model("User", userSchema);
 
-module.exports = Admin;
+module.exports = User;

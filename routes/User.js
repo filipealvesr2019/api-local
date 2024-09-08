@@ -12,7 +12,79 @@ const {
 } = require("../controllers/User");
 
 const User = require('../models/User');
-const { ensureAuthenticated } = require('../middleware/middlewares.authMiddleware');
+const UserForm = require('../models/UserForm');
+
+
+router.post("/signupUser", async (req, res) => {
+  try {
+    const {
+      userID,
+      name,
+ 
+      mobilePhone,
+      email,
+      postalCode,
+      address,
+      addressNumber,
+      complement,
+      province,
+      city,
+      state,
+   
+    } = req.body;
+
+    const existingUser = await UserForm.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        message: "Email já cadastrado. Faça login ou utilize outro email.",
+      });
+    }
+
+    const newUser = new UserForm({
+      userID,
+      name,
+
+      mobilePhone,
+      email,
+      postalCode,
+      address,
+      addressNumber,
+      complement,
+      province,
+      city,
+      state,
+   
+      isRegistered: true, // Definir como true quando o usuário for criado
+    });
+
+    const savedUser = await newUser.save();
+
+    
+
+    res.status(201).json({
+      user: savedUser,
+      message: "Usuário criado com sucesso.",
+
+    });
+  } catch (error) {
+    console.error("Erro ao criar usuário:", error);
+    res
+      .status(500)
+      .json({ message: "Erro interno do servidor ao criar usuário." });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
 // Middleware para verificar o token
 // Autenticação Local
 router.post('/signin', passport.authenticate('local'), (req, res) => {
