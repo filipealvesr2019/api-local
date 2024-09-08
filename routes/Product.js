@@ -5,7 +5,7 @@ const Product = require('../models/products/product'); // Certifique-se de que o
 // Rota para cadastrar um produto
 router.post('/products', async (req, res) => {
   try {
-    const { name, category, price, imageUrl,  variations } = req.body;
+    const { adminID, name, category, price, imageUrl,  variations } = req.body;
 
     // Validação simples (pode ser expandida conforme necessário)
     if (!name || !category) {
@@ -14,6 +14,7 @@ router.post('/products', async (req, res) => {
 
     // Criação de um novo produto
     const newProduct = new Product({
+      adminID,
       name,
       category,
       price,

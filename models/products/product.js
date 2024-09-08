@@ -7,6 +7,11 @@ const variationSchema = new mongoose.Schema({
 });
 
 const productSchema = new mongoose.Schema({
+  adminID: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Customer",
+    required: true,
+  },
   name: { type: String, required: true },
   category: { type: String, required: true },
   imageUrl: { type: String, required: true },
