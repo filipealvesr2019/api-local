@@ -7,9 +7,9 @@ const variationSchema = new mongoose.Schema({
 });
 
 const cartSchema = new mongoose.Schema({
-  customerId: {
+  userID: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Customer",
+    ref: "UserForm",
     required: true,
   },
   name: {

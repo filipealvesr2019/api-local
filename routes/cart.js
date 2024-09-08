@@ -1,22 +1,22 @@
 const express = require("express");
 const Cart = require("../models/cart/cart");
 const Product = require("../models/products/product");
-const Customer = require("../models/Customer");
+const UserForm = require("../models/UserForm");
 const router = express.Router();
 const { ObjectId } = require('mongoose').Types;
-router.post("/cart/:customerId/:productId", async (req, res) => {
+router.post("/cart/:userID/:productId", async (req, res) => {
   try {
-    const { customerId, productId } = req.params;
+    const { userID, productId } = req.params;
     const { variations, quantity } = req.body; // Array de variações
 
     // Verifique se o customerId e o productId são válidos
-    if (!ObjectId.isValid(customerId) || !ObjectId.isValid(productId)) {
+    if (!ObjectId.isValid(userID) || !ObjectId.isValid(productId)) {
       return res.status(400).json({ error: "Invalid customer ID or product ID" });
     }
 
     // Buscar cliente no banco de dados
-    const customer = await Customer.findOne({ customerId: customerId });
-    if (!customer) {
+    const User = await UserForm.findOne({ userID: userID });
+    if (!User) {
       return res.status(404).json({ error: "Customer not found" });
     }
 
@@ -40,7 +40,7 @@ router.post("/cart/:customerId/:productId", async (req, res) => {
     let totalAmount = total + variationTotal
     // Criar novo pedido com as variações fornecidas
     const newOrder = new Cart({
-      customerId: customer._id,
+      userID: User.userID,
       name: product.name,
       category: product.category,
       price: product.price,
