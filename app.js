@@ -33,7 +33,8 @@ app.use(cookieParser());
 app.use(cors({
   origin: [
     'http://localhost:5002',
-    'http://localhost:5005'
+    'http://localhost:5005',
+    'https://front-end-local.vercel.app'
   ],
   credentials: true // Se você estiver usando cookies ou headers personalizados
 }));
