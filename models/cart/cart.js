@@ -35,8 +35,6 @@ const cartSchema = new mongoose.Schema({
   },
   totalAmount: { type: Number, required: true },
   quantity: { type: Number, required: true },
-  pixKey: { type: String, required: true },
-
   variations: [variationSchema], // Array de variações
 });
 

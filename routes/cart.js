@@ -50,7 +50,6 @@ router.post("/cart/:userID/:productId", async (req, res) => {
       quantity: quantity,
       totalAmount: totalAmount,
       variations: variations, // Array de variações
-      pixKey: "",  // Isso pode ser atualizado depois se necessário
 
     });
 
