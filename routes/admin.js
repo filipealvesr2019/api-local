@@ -7,6 +7,7 @@ const bcrypt = require("bcryptjs"); // Para gerar senhas temporárias
 const jwt = require("jsonwebtoken");
 const PixQRCode = require("../models/Pix/QRCodePIX");
 const QRCode = require('qrcode');
+const { ObjectId } = require('mongoose').Types;
 
 const {
   getUser,
@@ -442,5 +443,31 @@ router.post('/qr-code/', async (req, res) => {
   }
 });
 
+
+
+// Rota para encontrar o QR Code pelo adminID
+router.get('/qr-code/:adminID', async (req, res) => {
+  try {
+    const { adminID } = req.params;
+
+    // Verifica se o adminID é válido
+    if (!ObjectId.isValid(adminID)) {
+      return res.status(400).json({ error: "Invalid admin ID" });
+    }
+
+    // Busca o QR Code no banco de dados pelo adminID
+    const qrCode = await PixQRCode.findOne({ adminID: adminID });
+
+    if (!qrCode) {
+      return res.status(404).json({ error: "QR Code not found for this admin" });
+    }
+
+    // Retorna o QR Code encontrado
+    res.status(200).json({ qrCode });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "An error occurred while retrieving the QR Code" });
+  }
+});
 
 module.exports = router;

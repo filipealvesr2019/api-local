@@ -4,7 +4,6 @@ const Product = require("../models/products/product");
 const UserForm = require("../models/UserForm");
 const router = express.Router();
 const { ObjectId } = require('mongoose').Types;
-const QRCode = require('qrcode');
 
 router.post("/cart/:userID/:productId", async (req, res) => {
   try {
