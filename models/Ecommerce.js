@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const EcommerceSchema = new mongoose.Schema({
-  clienteId: mongoose.Schema.Types.ObjectId,
+  adminID: mongoose.Schema.Types.ObjectId,
  
   layout: { type: String, required: true }, // 'layout1', 'layout2', etc.
 

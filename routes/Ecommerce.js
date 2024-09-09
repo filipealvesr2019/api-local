@@ -21,10 +21,10 @@ const ensureDirectoryExistence = (filePath) => {
 
 // Rota para criar um e-commerce
 router.post('/create-ecommerce', async (req, res) => {
-  const { clienteId, layout, theme, } = req.body;
+  const { adminID, layout, theme, } = req.body;
 
   const ecommerce = new Ecommerce({
-    clienteId,
+    adminID,
     theme,
     layout
   });
@@ -40,7 +40,7 @@ router.post('/add-domain', async (req, res) => {
   const porta = currentPort++;
 
   try {
-    const ecommerce = await Ecommerce.findOne({ _id: ecommerceId, clienteId });
+    const ecommerce = await Ecommerce.findOne({ _id: ecommerceId, adminID });
 
     if (!ecommerce) {
       return res.status(404).send('E-commerce não encontrado');
@@ -188,11 +188,11 @@ router.get('/theme/:id', async (req, res) => {
 
 
   // Rota para buscar um e-commerce pelo ID do usuário
-router.get('/ecommerce/admin/:clienteId', async (req, res) => {
-  const { clienteId } = req.params;
+router.get('/ecommerce/admin/:adminID', async (req, res) => {
+  const { adminID } = req.params;
 
   try {
-    const ecommerce = await Ecommerce.findOne({ clienteId });
+    const ecommerce = await Ecommerce.findOne({ adminID });
 
     if (!ecommerce) {
       return res.status(404).send('E-commerce não encontrado');

@@ -1,5 +1,5 @@
 // controllers/AuthController.js
-const superAdmin = require("../models/superAdmin");
+
 const jwt = require("jsonwebtoken");
 const validator = require("validator");
 const sendToken = require("../utils/jwtToken");
@@ -36,7 +36,7 @@ const registerUser = async (req, res, next) => {
     }
   
     try {
-      const user = await superAdmin.create({
+      const user = await User.create({
         email,
         password,
         role,
@@ -80,7 +80,7 @@ const registerAdmin = async (req, res, next) => {
   }
 
   try {
-    const user = await superAdmin.create({
+    const user = await User.create({
       email,
       password,
       role,
@@ -147,7 +147,7 @@ const loginCustomer = async (req, res, next) => {
   }
 
   // Procurando usuário no banco de dados
-  const user = await superAdmin.findOne({ email }).select("+password +role");
+  const user = await User.findOne({ email }).select("+password +role");
 
   if (!user) {
     console.log("Usuário não encontrado");
@@ -248,7 +248,7 @@ const loginUser = async (req, res, next) => {
   }
 
   // Agora, dependendo do papel (role) do usuário, você pode realizar ações específicas
-  if (user.role === "superAdmin") {
+  if (user.role === "User") {
     // Lógica para administrador
     // Adicione aqui as ações específicas para o administrador
   }
@@ -260,7 +260,7 @@ const loginUser = async (req, res, next) => {
 const getUser = async (req, res) => {
   try {
     const userId = req.params.id;
-    const user = await superAdmin.findById(userId).exec();
+    const user = await User.findById(userId).exec();
     if (!user) {
       return res.status(404).send("Usuário não encontrado!");
     }
@@ -293,7 +293,7 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const userId = req.params.id;
-    const deletedUser = await superAdmin.findByIdAndDelete(userId);
+    const deletedUser = await User.findByIdAndDelete(userId);
     if (!deletedUser) {
       return res.status(404).send("Usuário não encontrado para exclusão!");
     }
@@ -320,7 +320,7 @@ const getUserByUsername = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
   try {
-    const users = await superAdmin.find({ role: { $ne: "customer" } });
+    const users = await User.find({ role: { $ne: "customer" } });
     res.status(200).json(users);
   } catch (error) {
     console.error(error);
@@ -378,7 +378,7 @@ const sendPasswordResetEmail = async (req, res) => {
 
   try {
     // Verificar se o usuário existe no banco de dados
-    const user = await superAdmin.findOne({ email });
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: "Usuário não encontrado." });
     }
@@ -399,7 +399,7 @@ const sendPasswordResetEmail = async (req, res) => {
 
     const client = new postmark.ServerClient(postmarkApiKey);
 
-    const resetLink = `http://localhost:5003/reset-password/${resetToken}`;
+    const resetLink = `http://localhost:5002/reset-password/${resetToken}`;
 
     await client.sendEmail({
       From: "ceo@mediewal.com.br",
@@ -477,7 +477,7 @@ const resetPassword = async (req, res) => {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     // Atualizar a senha do usuário no banco de dados
-    await superAdmin.updateOne({ _id: userId }, { password: hashedPassword });
+    await User.updateOne({ _id: userId }, { password: hashedPassword });
 
     res.status(200).json({ message: "Senha redefinida com sucesso." });
   } catch (error) {

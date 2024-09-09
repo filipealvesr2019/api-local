@@ -136,7 +136,7 @@ const sendEmail = async (email, token) => {
 
 
 // Rota para solicitar registro
-router.post("/register/request", async (req, res) => {
+router.post("/admin/register/request", async (req, res) => {
   const { email } = req.body;
 
   try {
@@ -154,7 +154,7 @@ router.post("/register/request", async (req, res) => {
 });
 
 // Rota para solicitar registro
-router.post("/register/:token", async (req, res) => {
+router.post("/admin/register/:token", async (req, res) => {
   const { token } = req.params;
   const { email, password, role } = req.body;
 
@@ -185,7 +185,7 @@ router.post("/register/:token", async (req, res) => {
 
     // Ajuste do modelo Ecommerce
     const ecommerce = new Ecommerce({
-      clienteId: user._id,
+      adminID: user._id,
       layout: 'layout1', // Ajuste conforme necessário
       theme: {
         header: {
@@ -218,7 +218,7 @@ router.post("/register/:token", async (req, res) => {
 });
 
 // Rota para registrar usuário com o token
-router.post("/register/:token", async (req, res) => {
+router.post("/admin/register/:token", async (req, res) => {
   const { token } = req.params;
   const { email, password, role } = req.body;
 
@@ -252,7 +252,7 @@ router.post("/register/:token", async (req, res) => {
 
     const Ecommerce = new Ecommerce({
       layout: layout,
-      clienteId: _id,
+      adminID: _id,
 
       theme: {
         header: {

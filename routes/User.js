@@ -462,7 +462,7 @@ router.post("/forgot-password", sendPasswordResetEmail);
 router.post("/reset-password/:token", resetPassword);
 
 
-router.post("/superAdmin", registerUser); // Use directly from AuthController
+router.post("/User", registerUser); // Use directly from AuthController
 
 
 

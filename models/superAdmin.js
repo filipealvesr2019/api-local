@@ -66,6 +66,6 @@ superAdminSchema.methods.getJwtToken = function() {
   });
 }
 
-const SuperAdmin = mongoose.model("SuperAdmin", superAdminSchema);
+const superAdmin = mongoose.model("superAdmin", superAdminSchema);
 
-module.exports = SuperAdmin;
+module.exports = superAdmin;
