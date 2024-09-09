@@ -75,5 +75,28 @@ router.get('/products/:id', async (req, res) => {
     }
   });
 
-  
+  // Rota para obter todos os produtos para um adminID específico
+router.get('/products/:adminID', async (req, res) => {
+  try {
+    const adminID = req.params.adminID;
+    
+    // Validação do adminID (opcional)
+    if (!mongoose.Types.ObjectId.isValid(adminID)) {
+      return res.status(400).json({ message: 'Invalid adminID' });
+    }
+    
+    // Encontrar todos os produtos associados ao adminID
+    const products = await Product.find({ adminID });
+    
+    if (products.length === 0) {
+      return res.status(404).json({ message: 'No products found' });
+    }
+    
+    res.json(products);
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;
