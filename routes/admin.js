@@ -5,6 +5,9 @@ const validator = require("validator");
 const Admin = require("../models/admin");
 const bcrypt = require("bcryptjs"); // Para gerar senhas temporárias
 const jwt = require("jsonwebtoken");
+const PixQRCode = require("../models/Pix/QRCodePIX");
+const QRCode = require('qrcode');
+
 const {
   getUser,
   updateUser,
@@ -408,4 +411,36 @@ const resetPassword = async (req, res) => {
 router.post("/forgot-password", sendPasswordResetEmail);
 // Rota para redefinir a senha
 router.post("/reset-password/:token", resetPassword);
+
+
+
+
+
+
+
+
+
+router.post('/qr-code/', async (req, res) => {
+  const { pixKey, adminID } = req.body;
+
+  if (!pixKey) {
+    return res.status(400).send('Pix Key is required');
+  }
+
+  try {
+    // Gera o QR Code
+    const qrCodeUrl = await QRCode.toDataURL(pixKey);
+
+    // Salva o PIX e o QR Code no banco de dados
+    const newPix = new PixQRCode({adminID: adminID, pixKey, qrCodeUrl });
+    await newPix.save();
+
+    res.status(201).send({ qrCodeUrl });
+  } catch (error) {
+    console.error('Error generating QR code:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+
 module.exports = router;

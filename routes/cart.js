@@ -5,8 +5,6 @@ const UserForm = require("../models/UserForm");
 const router = express.Router();
 const { ObjectId } = require('mongoose').Types;
 const QRCode = require('qrcode');
-const Pix = require("../models/Pix/Pix");
-const PixQRCode = require("../models/Pix/QRCodePIX");
 
 router.post("/cart/:userID/:productId", async (req, res) => {
   try {
@@ -66,30 +64,5 @@ router.post("/cart/:userID/:productId", async (req, res) => {
     res.status(500).json({ error: "An error occurred while creating the order" });
   }
 });
-
-
-
-router.post('/qr-code', async (req, res) => {
-  const { pixKey } = req.body;
-
-  if (!pixKey) {
-    return res.status(400).send('Pix Key is required');
-  }
-
-  try {
-    // Gera o QR Code
-    const qrCodeUrl = await QRCode.toDataURL(pixKey);
-
-    // Salva o PIX e o QR Code no banco de dados
-    const newPix = new PixQRCode({ pixKey, qrCodeUrl });
-    await newPix.save();
-
-    res.status(201).send({ qrCodeUrl });
-  } catch (error) {
-    console.error('Error generating QR code:', error);
-    res.status(500).send('Internal Server Error');
-  }
-});
-
 
 module.exports = router;
