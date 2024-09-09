@@ -112,7 +112,33 @@ router.get('/ecommerces', async (req, res) => {
 
 
 
-
+  // Rota para listar todos os temas
+  router.get('/eccomerces', async (req, res) => {
+    try {
+      const ecommerce = await Ecommerce.find();
+      res.send(ecommerce);
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  });
+  
+  router.get('/loja/:subdomain', async (req, res) => {
+    const { subdomain } = req.params;
+  
+    try {
+      const ecommerce = await Ecommerce.findOne({ dominio: subdomain }).exec();
+  
+      if (!ecommerce) {
+        return res.status(404).json({ success: false, error: 'E-commerce não encontrado.' });
+      }
+  
+      res.status(200).json(ecommerce);
+    } catch (error) {
+      console.error('Erro ao buscar e-commerce', error);
+      res.status(500).json({ success: false, error: 'Erro interno do servidor.' });
+    }
+  });
+  
 
 
   // Rota para listar todos os temas

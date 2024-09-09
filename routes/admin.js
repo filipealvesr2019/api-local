@@ -156,7 +156,7 @@ router.post("/admin/register/request", async (req, res) => {
 // Rota para solicitar registro
 router.post("/admin/register/:token", async (req, res) => {
   const { token } = req.params;
-  const { email, password, role } = req.body;
+  const { subdomain, email, password, role } = req.body;
 
   try {
     // Verificar se o token é válido
@@ -187,6 +187,7 @@ router.post("/admin/register/:token", async (req, res) => {
     const ecommerce = new Ecommerce({
       adminID: user._id,
       layout: 'layout1', // Ajuste conforme necessário
+      dominio: subdomain,
       theme: {
         header: {
           Logo: 'https://i.imgur.com/bMWS6ec.png', // Ajuste conforme necessário
