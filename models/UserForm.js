@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const userFormSchema = new mongoose.Schema({
   userID:{ type: String,  },
+  adminID: { type: String,  },
   name: { type: String, },
 
   mobilePhone: { type: String,  },

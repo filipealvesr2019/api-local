@@ -18,6 +18,7 @@ const UserForm = require('../models/UserForm');
 router.post("/signupUser", async (req, res) => {
   try {
     const {
+      adminID,
       userID,
       name,
  
@@ -41,6 +42,7 @@ router.post("/signupUser", async (req, res) => {
     }
 
     const newUser = new UserForm({
+      adminID,
       userID,
       name,
 
