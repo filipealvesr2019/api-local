@@ -63,4 +63,38 @@ router.post("/cart/:userID/:productId", async (req, res) => {
   }
 });
 
+
+
+// Rota para obter os detalhes de um produto pelo ID
+router.get('/sales/:id', async (req, res) => {
+  try {
+      const sales = await Cart.findById(req.params.id); // Busca o produto pelo ID
+      if (!sales) {
+          return res.status(404).json({ error: 'sale not found' });
+      }
+      res.status(200).json(sales); // Retorna os detalhes do produto em formato JSON
+  } catch (error) {
+      console.error('Error fetching sale details:', error);
+      res.status(500).json({ error: 'Failed to fetch sale details.' });
+  }
+});
+
+// Rota para buscar pedidos por adminID
+router.get('/sales/:adminID', async (req, res) => {
+  try {
+    const { adminID } = req.params;
+    
+    // Buscar produtos pelo adminID
+    const sales = await Cart.find({ adminID });
+
+    if (!sales.length) {
+      return res.status(404).json({ message: "Nenhum pedido encontrado para este adminID" });
+    }
+
+    res.status(200).json(sales);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao buscar os pedidos' });
+  }
+});
+
 module.exports = router;
