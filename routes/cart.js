@@ -66,7 +66,7 @@ router.post("/cart/:userID/:productId", async (req, res) => {
 
 
 // Rota para obter os detalhes de um produto pelo ID
-router.get('/sales/:id', async (req, res) => {
+router.get('/sale/:id', async (req, res) => {
   try {
       const sales = await Cart.findById(req.params.id); // Busca o produto pelo ID
       if (!sales) {
