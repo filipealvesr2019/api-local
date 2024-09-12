@@ -62,7 +62,7 @@ router.get('/product/:id', async (req, res) => {
 
 
 // Rota para buscar um produto específico pelo storeID e productID
-app.get('/produto/loja/:storeID/:productID', async (req, res) => {
+router.get('/produto/loja/:storeID/:productID', async (req, res) => {
   try {
     const { storeID, productID } = req.params;
     
