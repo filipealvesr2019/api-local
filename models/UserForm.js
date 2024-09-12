@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const userFormSchema = new mongoose.Schema({
   userID:{ type: String,  },
-  adminID: { type: String,  },
+  storeID: { type: String,  },
   name: { type: String, },
 
   mobilePhone: { type: String,  },

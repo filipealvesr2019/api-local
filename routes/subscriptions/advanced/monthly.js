@@ -35,7 +35,7 @@ router.post("/monthly/subscription/pix/:customerId", async (req, res) => {
       billingType: 'PIX',
       cycle: 'MONTHLY',
       customer: asaasCustomerId,
-      nextDueDate: '2024-09-10',
+      nextDueDate: '2024-09-11',
       value: 29.99,
       description: 'Assinatura Plano basico',
       discount: { value: 10, dueDateLimitDays: 0 },

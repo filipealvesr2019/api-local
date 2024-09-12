@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const EcommerceSchema = new mongoose.Schema({
   adminID: mongoose.Schema.Types.ObjectId,
  
-  layout: { type: String, required: true }, // 'layout1', 'layout2', etc.
+  layout: { type: String }, // 'layout1', 'layout2', etc.
 
   theme: {
     header: {
@@ -27,6 +27,9 @@ const EcommerceSchema = new mongoose.Schema({
   },
   dominio: { type: String, default: null },
   porta: { type: Number, default: null },
+
+pixKey: { type: String, },
+qrCodeUrl: { type: String, },
 });
 
 module.exports = mongoose.model('Ecommerce', EcommerceSchema);

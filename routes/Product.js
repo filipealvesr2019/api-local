@@ -6,7 +6,7 @@ const { default: mongoose } = require('mongoose');
 // Rota para cadastrar um produto
 router.post('/products', async (req, res) => {
   try {
-    const { adminID, name, category, price, imageUrl,  variations } = req.body;
+    const { adminID, storeID,  name, category, price, imageUrl,  variations } = req.body;
 
     // Validação simples (pode ser expandida conforme necessário)
     if (!name || !category) {
@@ -16,6 +16,7 @@ router.post('/products', async (req, res) => {
     // Criação de um novo produto
     const newProduct = new Product({
       adminID,
+      storeID,
       name,
       category,
       price,
@@ -81,5 +82,22 @@ router.get('/products/:adminID', async (req, res) => {
   }
 });
 
+
+// Rota para buscar todos os produtos pelo storeID
+router.get('/produtos/loja/:storeID', async (req, res) => {
+  try {
+    // Busca todos os produtos pelo storeID
+    const produtos = await Product.find({ storeID: req.params.storeID });
+
+    if (produtos.length === 0) {
+      return res.status(404).json({ message: 'Nenhum produto encontrado para esta loja.' });
+    }
+
+    // Retorna a lista de produtos
+    res.json(produtos);
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao buscar os produtos', error });
+  }
+});
 
 module.exports = router;

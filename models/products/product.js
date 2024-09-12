@@ -12,6 +12,7 @@ const productSchema = new mongoose.Schema({
     ref: "Customer",
     required: true,
   },
+  storeID:  {type: String, required: true },
   name: { type: String, required: true },
   category: { type: String, required: true },
   imageUrl: { type: String, required: true },
