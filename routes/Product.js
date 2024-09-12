@@ -61,6 +61,24 @@ router.get('/product/:id', async (req, res) => {
 });
 
 
+// Rota para buscar um produto específico pelo storeID e productID
+app.get('/produto/loja/:storeID/:productID', async (req, res) => {
+  try {
+    const { storeID, productID } = req.params;
+    
+    // Busca o produto pelo storeID e pelo productID
+    const produto = await Product.findOne({ storeID, _id: productID });
+
+    if (!produto) {
+      return res.status(404).json({ message: 'Produto não encontrado para esta loja.' });
+    }
+
+    // Retorna o produto específico
+    res.json(produto);
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao buscar o produto', error });
+  }
+});
 
   // Rota para obter todos os produtos para um adminID específico
 
