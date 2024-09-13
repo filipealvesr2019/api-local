@@ -261,16 +261,29 @@ router.get("/vendas/total-ano/:storeID", async (req, res) => {
 });
 
 
-router.get("/produtos-mais-vendidos/:storeID", async (req, res) => {
+
+
+router.get("/produtos-mais-vendidos-dia/:storeID", async (req, res) => {
   try {
     const { storeID } = req.params;
 
-    // Filtra por storeID e status "RECEIVED"
-    const produtosMaisVendidos = await Cart.aggregate([
+    // Pega o início do dia e o fim do dia atual
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0); // Define a hora como início do dia
+
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999); // Define a hora como o final do dia
+
+    // Filtra por storeID e status "RECEIVED" e compras feitas no dia atual
+    const produtosMaisVendidosDia = await Cart.aggregate([
       {
         $match: {
           storeID: new mongoose.Types.ObjectId(storeID),
           status: "RECEIVED", // Apenas compras confirmadas
+          purchaseDate: {
+            $gte: startOfDay, // Compras a partir do início do dia
+            $lte: endOfDay, // Compras até o final do dia
+          },
         },
       },
       {
@@ -288,13 +301,13 @@ router.get("/produtos-mais-vendidos/:storeID", async (req, res) => {
       },
     ]);
 
-    if (produtosMaisVendidos.length === 0) {
+    if (produtosMaisVendidosDia.length === 0) {
       return res.status(200).json({ message: "Nenhuma venda encontrada." });
     }
 
-    // Retorna os produtos mais vendidos
+    // Retorna os produtos mais vendidos no dia
     res.status(200).json(
-      produtosMaisVendidos.map((item) => ({
+      produtosMaisVendidosDia.map((item) => ({
         produto: item.produto.name,
         totalVendas: item.totalVendas,
         totalPrecoVendas: item.totalPrecoVendas, // Preço total de vendas para esse produto
@@ -306,9 +319,10 @@ router.get("/produtos-mais-vendidos/:storeID", async (req, res) => {
       }))
     );
   } catch (error) {
-    console.error("Erro ao buscar os produtos mais vendidos:", error);
-    res.status(500).json({ message: "Erro ao buscar os produtos mais vendidos", error });
+    console.error("Erro ao buscar os produtos mais vendidos do dia:", error);
+    res.status(500).json({ message: "Erro ao buscar os produtos mais vendidos do dia", error });
   }
 });
+
 
 module.exports = router;
