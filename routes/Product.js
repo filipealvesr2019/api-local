@@ -35,16 +35,7 @@ router.post('/products', async (req, res) => {
     res.status(500).json({ error: 'Failed to create product.' });
   }
 });
-// Rota para listar todos os produtos com suas variações
-router.get('/products', async (req, res) => {
-    try {
-      const products = await Product.find(); // Busca todos os produtos
-      res.status(200).json(products); // Retorna todos os produtos em formato JSON
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      res.status(500).json({ error: 'Failed to fetch products.' });
-    }
-  });
+
 
 // Rota para obter os detalhes de um produto pelo ID
 router.get('/product/:id', async (req, res) => {
@@ -105,7 +96,7 @@ router.get('/products/:adminID', async (req, res) => {
 router.get('/produtos/loja/:storeID', async (req, res) => {
   try {
     // Busca todos os produtos pelo storeID
-    const produtos = await Product.find({ storeID: req.params.storeID });
+    const produtos = await Product.find({ storeID: req.params.storeID }).select('-adminID');;
 
     if (produtos.length === 0) {
       return res.status(404).json({ message: 'Nenhum produto encontrado para esta loja.' });

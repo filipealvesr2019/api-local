@@ -79,21 +79,50 @@ router.get('/sale/:id', async (req, res) => {
   }
 });
 
-// Rota para buscar pedidos por adminID
-router.get('/sales/:adminID', async (req, res) => {
-  try {
-    const { adminID } = req.params;
-    
-    // Buscar produtos pelo adminID
-    const sales = await Cart.find({ adminID });
 
-    if (!sales.length) {
-      return res.status(404).json({ message: "Nenhum pedido encontrado para este adminID" });
+
+
+
+// Rota para buscar todas as vendas de um carrinho por storeID
+router.get("/user/vendas/:storeID", async (req, res) => {
+  try {
+    const { storeID } = req.params;
+
+    // Buscar todas as vendas que correspondem ao storeID
+    const vendas = await Cart.find({ storeID });
+
+    // Se não houver vendas, retornar uma mensagem informativa
+    if (vendas.length === 0) {
+      return res.status(404).json({ message: "Nenhuma venda encontrada para esta loja." });
     }
 
-    res.status(200).json(sales);
+    // Retornar as vendas encontradas
+    res.status(200).json(vendas);
   } catch (error) {
-    res.status(500).json({ error: 'Erro ao buscar os pedidos' });
+    // Se houver um erro na consulta, retornar o erro
+    res.status(500).json({ message: "Erro ao buscar vendas", error });
+  }
+});
+
+
+// Rota para buscar todas as vendas de um carrinho por storeID
+router.get("/admin/vendas/:storeID", async (req, res) => {
+  try {
+    const { storeID } = req.params;
+
+    // Buscar todas as vendas que correspondem ao storeID
+    const vendas = await Cart.find({ storeID });
+
+    // Se não houver vendas, retornar uma mensagem informativa
+    if (vendas.length === 0) {
+      return res.status(404).json({ message: "Nenhuma venda encontrada para esta loja." });
+    }
+
+    // Retornar as vendas encontradas
+    res.status(200).json(vendas);
+  } catch (error) {
+    // Se houver um erro na consulta, retornar o erro
+    res.status(500).json({ message: "Erro ao buscar vendas", error });
   }
 });
 

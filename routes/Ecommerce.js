@@ -127,7 +127,7 @@ router.get('/ecommerces', async (req, res) => {
     const { subdomain } = req.params;
   
     try {
-      const ecommerce = await Ecommerce.findOne({ dominio: subdomain }).exec();
+      const ecommerce = await Ecommerce.findOne({ dominio: subdomain }).select('-adminID').exec();
   
       if (!ecommerce) {
         return res.status(404).json({ success: false, error: 'E-commerce não encontrado.' });
