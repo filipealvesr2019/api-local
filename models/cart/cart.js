@@ -35,6 +35,8 @@ const cartSchema = new mongoose.Schema({
   },
   totalAmount: { type: Number, required: true },
   quantity: { type: Number, required: true },
+  status: { type: String, required: true }, // Campo para o status da compra
+  purchaseDate: { type: Date, required: true }, // Data da compra
   variations: [variationSchema], // Array de variações
 });
 
