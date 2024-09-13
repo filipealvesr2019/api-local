@@ -218,4 +218,46 @@ router.get("/vendas/total-mes/:storeID", async (req, res) => {
 });
 
 
+
+router.get("/vendas/total-ano/:storeID", async (req, res) => {
+  try {
+    const { storeID } = req.params;
+
+    // Pega o primeiro e o último dia do ano atual
+    const firstDayOfYear = new Date(new Date().getFullYear(), 0, 1); // Primeiro dia do ano
+    const lastDayOfYear = new Date(new Date().getFullYear(), 11, 31, 23, 59, 59); // Último dia do ano
+
+    // Filtra por storeID, status 'RECEIVED' e compras feitas no ano atual
+    const vendasDoAno = await Cart.aggregate([
+      {
+        $match: {
+          storeID: new mongoose.Types.ObjectId(storeID),
+          status: "RECEIVED", // Certifique-se de que o status é exatamente "RECEIVED"
+          purchaseDate: {
+            $gte: firstDayOfYear, // Compras a partir do primeiro dia do ano
+            $lte: lastDayOfYear, // Compras até o último dia do ano
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null, // Não agrupamos por nenhum campo, apenas somamos
+          totalGanho: { $sum: "$totalAmount" }, // Soma os totalAmount, que é o valor total da compra
+        },
+      },
+    ]);
+
+    // Verifica se há vendas no ano
+    if (vendasDoAno.length === 0) {
+      return res.status(200).json({ totalGanho: 0 });
+    }
+
+    // Retorna o total ganho no ano
+    res.status(200).json({ totalGanho: vendasDoAno[0].totalGanho });
+  } catch (error) {
+    console.error("Erro ao calcular o total de vendas do ano:", error);
+    res.status(500).json({ message: "Erro ao calcular o total do ano", error });
+  }
+});
+
 module.exports = router;
