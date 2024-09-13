@@ -260,4 +260,55 @@ router.get("/vendas/total-ano/:storeID", async (req, res) => {
   }
 });
 
+
+router.get("/produtos-mais-vendidos/:storeID", async (req, res) => {
+  try {
+    const { storeID } = req.params;
+
+    // Filtra por storeID e status "RECEIVED"
+    const produtosMaisVendidos = await Cart.aggregate([
+      {
+        $match: {
+          storeID: new mongoose.Types.ObjectId(storeID),
+          status: "RECEIVED", // Apenas compras confirmadas
+        },
+      },
+      {
+        $group: {
+          _id: "$name", // Agrupa pelo nome do produto
+          totalVendas: { $sum: "$quantity" }, // Soma a quantidade vendida
+          totalPrecoVendas: { $sum: "$totalAmount" }, // Soma o valor totalAmount diretamente
+          produto: { $first: "$$ROOT" }, // Mantém o primeiro documento completo
+        },
+      },
+      {
+        $sort: {
+          totalVendas: -1, // Ordena do mais vendido para o menos vendido
+        },
+      },
+    ]);
+
+    if (produtosMaisVendidos.length === 0) {
+      return res.status(200).json({ message: "Nenhuma venda encontrada." });
+    }
+
+    // Retorna os produtos mais vendidos
+    res.status(200).json(
+      produtosMaisVendidos.map((item) => ({
+        produto: item.produto.name,
+        totalVendas: item.totalVendas,
+        totalPrecoVendas: item.totalPrecoVendas, // Preço total de vendas para esse produto
+        detalhes: {
+          categoria: item.produto.category,
+          imagem: item.produto.imageUrl,
+          preco: item.produto.price,
+        },
+      }))
+    );
+  } catch (error) {
+    console.error("Erro ao buscar os produtos mais vendidos:", error);
+    res.status(500).json({ message: "Erro ao buscar os produtos mais vendidos", error });
+  }
+});
+
 module.exports = router;
