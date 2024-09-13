@@ -41,7 +41,7 @@ router.post("/cart/:userID/:productId", async (req, res) => {
     let totalAmount = total + variationTotal
     // Criar novo pedido com as variações fornecidas
     const newOrder = new Cart({
-      adminID: User.adminID,
+      storeID: User.storeID,
       userID: User.userID,
       name: product.name,
       category: product.category,

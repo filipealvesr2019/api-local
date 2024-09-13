@@ -12,7 +12,7 @@ const cartSchema = new mongoose.Schema({
     ref: "UserForm",
     required: true,
   },
-  adminID: {
+  storeID: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "UserForm",
     required: true,
