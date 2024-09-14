@@ -114,7 +114,7 @@ router.get("/admin/vendas/:storeID", async (req, res) => {
     const { storeID } = req.params;
 
     // Buscar todas as vendas que correspondem ao storeID
-    const vendas = await Cart.find({ storeID });
+    const vendas = await Cart.find({ storeID }).sort({ purchaseDate: -1 });;
 
     // Se não houver vendas, retornar uma mensagem informativa
     if (vendas.length === 0) {
