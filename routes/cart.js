@@ -324,5 +324,69 @@ router.get("/produtos-mais-vendidos-dia/:storeID", async (req, res) => {
   }
 });
 
+router.get("/produtos-mais-vendidos-relatorio/:storeID", async (req, res) => {
+  try {
+    const { storeID } = req.params;
+    const { startDate, endDate } = req.query; // Obtém as datas de início e fim dos parâmetros da URL
+
+    // Converte as strings de data em objetos Date
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999); // Define a hora final do dia de fim
+
+    // Verifica se as datas são válidas
+    if (isNaN(start) || isNaN(end)) {
+      return res.status(400).json({ message: "Datas inválidas. Use o formato YYYY-MM-DD." });
+    }
+
+    // Filtra por storeID e status "RECEIVED" dentro do intervalo de tempo
+    const produtosMaisVendidos = await Cart.aggregate([
+      {
+        $match: {
+          storeID: new mongoose.Types.ObjectId(storeID),
+          status: "RECEIVED", // Apenas compras confirmadas
+          purchaseDate: {
+            $gte: start, // Compras a partir da data de início
+            $lte: end, // Compras até a data de fim
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$name", // Agrupa pelo nome do produto
+          totalVendas: { $sum: "$quantity" }, // Soma a quantidade vendida
+          totalPrecoVendas: { $sum: "$totalAmount" }, // Soma o valor totalAmount diretamente
+          produto: { $first: "$$ROOT" }, // Mantém o primeiro documento completo
+        },
+      },
+      {
+        $sort: {
+          totalVendas: -1, // Ordena do mais vendido para o menos vendido
+        },
+      },
+    ]);
+
+    if (produtosMaisVendidos.length === 0) {
+      return res.status(200).json({ message: "Nenhuma venda encontrada no período selecionado." });
+    }
+
+    // Retorna os produtos mais vendidos
+    res.status(200).json(
+      produtosMaisVendidos.map((item) => ({
+        produto: item.produto.name,
+        totalVendas: item.totalVendas,
+        totalPrecoVendas: item.totalPrecoVendas, // Preço total de vendas para esse produto
+        detalhes: {
+          categoria: item.produto.category,
+          imagem: item.produto.imageUrl,
+          preco: item.produto.price,
+        },
+      }))
+    );
+  } catch (error) {
+    console.error("Erro ao gerar o relatório de produtos mais vendidos:", error);
+    res.status(500).json({ message: "Erro ao gerar o relatório", error });
+  }
+});
 
 module.exports = router;
