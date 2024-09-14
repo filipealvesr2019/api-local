@@ -133,7 +133,7 @@ router.get("/admin/vendas/:storeID", async (req, res) => {
 
 
 // Rota para calcular o total ganho no mesmo dia
-router.get("/vendas/total-dia/:storeID", async (req, res) => {
+router.get("/admin/vendas/total-dia/:storeID", async (req, res) => {
   try {
     const { storeID } = req.params;
 
@@ -176,7 +176,7 @@ router.get("/vendas/total-dia/:storeID", async (req, res) => {
   }
 });
 
-router.get("/vendas/total-mes/:storeID", async (req, res) => {
+router.get("/admin/vendas/total-mes/:storeID", async (req, res) => {
   try {
     const { storeID } = req.params;
 
@@ -386,6 +386,49 @@ router.get("/produtos-mais-vendidos-relatorio/:storeID", async (req, res) => {
   } catch (error) {
     console.error("Erro ao gerar o relatório de produtos mais vendidos:", error);
     res.status(500).json({ message: "Erro ao gerar o relatório", error });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+// Rota para atualizar o status da compra para "RECEIVED" ou "PENDING"
+router.put("/compras/:cartId/status", async (req, res) => {
+  const { cartId } = req.params; // ID da compra passada como parâmetro na URL
+  const { status } = req.body; // Status enviado no corpo da requisição
+
+  // Verifica se o status enviado é válido
+  const validStatuses = ["RECEIVED", "PENDING"];
+  if (!validStatuses.includes(status)) {
+    return res.status(400).json({ message: "Status inválido. Use 'RECEIVED' ou 'PENDING'." });
+  }
+
+  try {
+    // Encontrar e atualizar o status da compra com o novo valor
+    const updatedCart = await Cart.findByIdAndUpdate(
+      cartId,
+      { status }, // Atualiza o campo status com o valor enviado
+      { new: true } // Retorna o documento atualizado
+    );
+
+    // Se a compra não for encontrada, retorne um erro
+    if (!updatedCart) {
+      return res.status(404).json({ message: "Compra não encontrada" });
+    }
+
+    // Retorna o carrinho atualizado como resposta
+    res.status(200).json({ message: `Status atualizado para '${status}'`, updatedCart });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erro ao atualizar status da compra", error });
   }
 });
 
