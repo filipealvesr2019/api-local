@@ -1,68 +1,68 @@
 const express = require("express");
 const  Message  = require("../../models/meta API/Message");
+const { default: axios } = require("axios");
 
 const router = express.Router();
 
-
-// Rota para receber mensagens do WhatsApp via Webhook
-router.post('/whatsapp/webhook', async (req, res) => {
-    const body = req.body;
+// Rota para receber mensagens do WhatsApp
+router.post('/webhook/whatsapp', async (req, res) => {
+    const { from, to, message } = req.body;
   
-    if (body.object === 'whatsapp_business_account') {
-      body.entry.forEach(async (entry) => {
-        const changes = entry.changes;
-        changes.forEach(async (change) => {
-          const value = change.value;
-          const messages = value.messages;
-  
-          if (messages) {
-            // Para cada mensagem recebida
-            messages.forEach(async (message) => {
-              const senderPhoneNumber = message.from;
-              const messageContent = message.text.body;
-              const timestamp = new Date(message.timestamp * 1000); // Conversão de timestamp
-  
-              // Salvando a mensagem no MongoDB
-              const newMessage = new Message({
-                sender: senderPhoneNumber,
-                message: messageContent,
-                timestamp: timestamp,
-                status: 'received'  // Define status como recebido
-              });
-  
-              try {
-                await newMessage.save();
-                console.log('Mensagem salva no MongoDB');
-              } catch (error) {
-                console.error('Erro ao salvar mensagem no MongoDB:', error);
-              }
-            });
-          }
-  
-          // Caso o webhook envie status de mensagem
-          const statuses = value.statuses;
-          if (statuses) {
-            statuses.forEach(async (status) => {
-              // Atualiza o status da mensagem no MongoDB
-              const messageId = status.id;
-              const messageStatus = status.status;
-  
-              try {
-                await Message.findOneAndUpdate(
-                  { messageId: messageId },
-                  { status: messageStatus }
-                );
-                console.log('Status da mensagem atualizado:', messageStatus);
-              } catch (error) {
-                console.error('Erro ao atualizar status da mensagem:', error);
-              }
-            });
-          }
-        });
-      });
-      res.status(200).send('EVENT_RECEIVED');
-    } else {
-      res.sendStatus(404);
+    // Salve a mensagem no MongoDB
+    try {
+      const newMessage = new Message({ from, to, message });
+      await newMessage.save();
+      res.status(200).send('Mensagem recebida com sucesso');
+    } catch (error) {
+      console.error('Erro ao salvar a mensagem:', error);
+      res.status(500).send('Erro ao salvar a mensagem');
     }
   });
+  
+  // Rota para enviar uma mensagem pelo WhatsApp
+  router.post('/send-whatsapp', async (req, res) => {
+    const { to, message } = req.body;
+  
+    try {
+      const response = await axios.post('https://api.zenvia.com/v2/channels/whatsapp/messages', {
+        from: '+5585985757974', // Substitua pelo seu número de telefone no formato internacional
+        to,
+        contents: [{ type: 'text', text: message }]
+      }, {
+        headers: {
+                       'X-API-TOKEN': `${process.env.ZENVIA_API_KEY}`,
+                       },
+      });
+  
+      res.status(200).send(response.data);
+    } catch (error) {
+      console.error('Erro ao enviar a mensagem:', error);
+      res.status(500).send('Erro ao enviar a mensagem');
+    }
+  });
+
+//   // Rota para enviar uma mensagem pelo WhatsApp
+//   router.post('/send-whatsapp', async (req, res) => {
+//     const { to, message } = req.body;
+  
+//     try {
+//       const response = await axios.post('https://api.zenvia.com/v2/channels/whatsapp/messages', {
+//         from: '+5585985757974',
+//         to,
+//         contents: [{ type: 'text', text: message }]
+//       }, {
+     
+//         headers: {
+//             'X-API-TOKEN': `${process.env.ZENVIA_API_KEY}`,
+//           },
+//       });
+  
+//       res.status(200).send(response.data);
+//     } catch (error) {
+//       console.error('Erro ao enviar a mensagem:', error);
+//       res.status(500).send('Erro ao enviar a mensagem');
+//     }
+//   });
+  
+  
 module.exports = router;

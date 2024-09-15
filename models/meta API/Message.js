@@ -2,10 +2,10 @@ const mongoose = require("mongoose");
 
 
 const messageSchema  = new mongoose.Schema({
-    sender: String,
+    from: String,
+    to: String,
     message: String,
-    timestamp: Date,
-    status: String
+    timestamp: { type: Date, default: Date.now },
 });
 
 // Correctly define the Cart model
