@@ -79,7 +79,9 @@ dotenv.config();
 require('./passport-config'); // Configuração do Passport
 
 
-
+app.get('/', (req, res) => {
+  res.send('app, running!');
+});
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
