@@ -86,4 +86,26 @@ router.post("/send-whatsapp", async (req, res) => {
 //     }
 //   });
 
+
+
+// Rota para obter todas as mensagens de um admin específico
+router.get('/admin/whatsapp/messages/:adminID', async (req, res) => {
+  const { adminID } = req.params;
+
+  try {
+    // Consultar mensagens no MongoDB com base no adminID
+    const messages = await Whatsapp.find({ adminID });
+
+    if (messages.length === 0) {
+      return res.status(404).send('Nenhuma mensagem encontrada para esse adminID');
+    }
+
+    // Enviar as mensagens encontradas como resposta
+    res.status(200).json(messages);
+  } catch (error) {
+    console.error('Erro ao buscar mensagens:', error);
+    res.status(500).send('Erro ao buscar mensagens');
+  }
+});
+
 module.exports = router;
