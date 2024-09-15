@@ -19,7 +19,7 @@ const superAdmin = require('./routes/superAdmin');
 const Product = require('./routes/Product');
 const User = require('./routes/User');
 const cart = require('./routes/cart');
-const whatsapp = require('./routes/Meta API/whatsapp');
+const whatsapp = require('./routes/zenvia/whatsapp');
 
 
 const session = require('express-session');
