@@ -19,10 +19,9 @@ const superAdmin = require('./routes/superAdmin');
 const Product = require('./routes/Product');
 const User = require('./routes/User');
 const cart = require('./routes/cart');
-const whatsapp = require('./routes/zenvia/whatsapp');
+const whatsapp = require('./routes/chatpro/Whatsapp');
 
-const Instagram = require('./routes/zenvia/Instagram');
-const Facebook = require('./routes/zenvia/Facebook');
+
 
 
 
@@ -70,8 +69,7 @@ app.use('/api', Product);
 app.use('/api', User);
 app.use('/api', cart);
 app.use('/api', whatsapp);
-app.use('/api', Instagram);
-app.use('/api', Facebook);
+
 
 
 
