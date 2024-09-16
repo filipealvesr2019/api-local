@@ -41,7 +41,7 @@ app.use(cors({ origin: "*"}));
 //     'http://localhost:5002',
 //     'http://localhost:5005',
 //     'https://front-end-local.vercel.app',
-//     'https://1ebb-2804-1a04-804f-e800-ccba-cd15-961b-6945.ngrok-free.app/',
+//     'https://d87e-2804-1a04-804f-e800-ccba-cd15-961b-6945.ngrok-free.app',
 //     'https://local-front-end.vercel.app'
 
 //   ],
