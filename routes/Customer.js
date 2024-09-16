@@ -128,9 +128,10 @@ router.post(
     try {
       const token = process.env.ACCESS_TOKEN;
       // Captura o IP do cliente
-      const clientIp =
-      req.headers["x-forwarded-for"] ||  // Check if forwarded header exists
-      req.socket?.remoteAddress;         // Use socket to get IP address
+  // Captura o IP do cliente
+  const clientIp =
+  req.headers["x-forwarded-for"]?.split(',').shift() ||  // Pega o primeiro IP da lista se houver múltiplos IPs
+  req.socket?.remoteAddress;  // IP direto do socket, caso o x-forwarded-for não exista
 
 
       // Define a data de vencimento base
