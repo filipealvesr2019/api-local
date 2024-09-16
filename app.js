@@ -41,7 +41,7 @@ app.use(cors({
     'http://localhost:5002',
     'http://localhost:5005',
     'https://front-end-local.vercel.app',
-    'https://64f22388c1f395658e3d59cd7fc11988.serveo.net/',
+    'https://64f22388c1f395658e3d59cd7fc11988.serveo.net',
     'https://local-front-end.vercel.app'
 
   ],
