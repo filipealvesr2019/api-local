@@ -22,16 +22,15 @@ const router = express.Router();
 
 // Rota para enviar uma mensagem pelo WhatsApp
 // Rota para enviar uma mensagem pelo WhatsApp
-router.post("/send-whatsapp", async (req, res) => {
+router.post("/send-message-whatsapp", async (req, res) => {
   // Extraindo adminID, to, e message do corpo da requisição
-  const { number, message, adminID } = req.body;
 
   try {
     // Enviar a mensagem via API da Zenvia
     const response = await axios.post(
         `https://v5.chatpro.com.br/${process.env.INSTANCE_ID}/api/v1/send_message`,
       {
-        number: "8582138371", // Substitua pelo seu número de telefone no formato internacional
+        number: process.env.PHONE_NUMBER, // Substitua pelo seu número de telefone no formato internacional
         message: "testeteste"
       },
       {
@@ -43,17 +42,7 @@ router.post("/send-whatsapp", async (req, res) => {
       }
     );
 
-    // // Criar um novo documento no MongoDB com os detalhes da mensagem
-    // const newMessage = new Whatsapp({
-    //   adminID,   // O ID do admin enviado no body
-    //   from: process.env.PHONE_NUMBER, // O número do remetente
-    //   to: "8582138371",        // O número do destinatário
-    //   message,   // O conteúdo da mensagem
-    //   timestamp: Date.now()  // O horário atual
-    // });
-
-    // // Salvar a mensagem no MongoDB
-    // await newMessage.save();
+ 
 
     // Responder com os dados da resposta da API Zenvia
     res.status(200).send({ message: 'Mensagem enviada e salva com sucesso', data: response.data });
