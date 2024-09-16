@@ -132,10 +132,6 @@ router.post(
       req.headers["x-forwarded-for"] ||  // Check if forwarded header exists
       req.socket?.remoteAddress;         // Use socket to get IP address
 
-console.log("Client IP:", clientIp); // Log to check which IP is captured
-
-
-    console.log("Client IP:", clientIp); // Log para verificar qual IP está sendo capturado
 
       // Define a data de vencimento base
       const dueDate = new Date();
@@ -190,7 +186,6 @@ console.log("Client IP:", clientIp); // Log to check which IP is captured
 
      
 
-console.log("clientIp", clientIp)
       res.json(payments);
     } catch (error) {
       console.error("Error fetching data:", error);
