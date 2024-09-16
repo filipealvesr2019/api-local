@@ -3,6 +3,7 @@ const Cart = require("../models/cart/cart");
 const Product = require("../models/products/product");
 const UserForm = require("../models/UserForm");
 const { default: mongoose } = require("mongoose");
+const FinancialTransaction = require("../models/Financial/FinancialTransaction");
 const router = express.Router();
 const { ObjectId } = require('mongoose').Types;
 
@@ -400,6 +401,38 @@ router.get("/produtos-mais-vendidos-relatorio/:storeID", async (req, res) => {
 
 
 
+// // Rota para atualizar o status da compra para "RECEIVED" ou "PENDING"
+// router.put("/compras/:cartId/status", async (req, res) => {
+//   const { cartId } = req.params; // ID da compra passada como parâmetro na URL
+//   const { status } = req.body; // Status enviado no corpo da requisição
+
+//   // Verifica se o status enviado é válido
+//   const validStatuses = ["RECEIVED", "PENDING"];
+//   if (!validStatuses.includes(status)) {
+//     return res.status(400).json({ message: "Status inválido. Use 'RECEIVED' ou 'PENDING'." });
+//   }
+
+//   try {
+//     // Encontrar e atualizar o status da compra com o novo valor
+//     const updatedCart = await Cart.findByIdAndUpdate(
+//       cartId,
+//       { status }, // Atualiza o campo status com o valor enviado
+//       { new: true } // Retorna o documento atualizado
+//     );
+
+//     // Se a compra não for encontrada, retorne um erro
+//     if (!updatedCart) {
+//       return res.status(404).json({ message: "Compra não encontrada" });
+//     }
+
+//     // Retorna o carrinho atualizado como resposta
+//     res.status(200).json({ message: `Status atualizado para '${status}'`, updatedCart });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Erro ao atualizar status da compra", error });
+//   }
+// });
+
 // Rota para atualizar o status da compra para "RECEIVED" ou "PENDING"
 router.put("/compras/:cartId/status", async (req, res) => {
   const { cartId } = req.params; // ID da compra passada como parâmetro na URL
@@ -412,24 +445,41 @@ router.put("/compras/:cartId/status", async (req, res) => {
   }
 
   try {
-    // Encontrar e atualizar o status da compra com o novo valor
-    const updatedCart = await Cart.findByIdAndUpdate(
-      cartId,
-      { status }, // Atualiza o campo status com o valor enviado
-      { new: true } // Retorna o documento atualizado
-    );
+    // Buscar a compra (carrinho) existente
+    const cart = await Cart.findById(cartId);
 
     // Se a compra não for encontrada, retorne um erro
-    if (!updatedCart) {
+    if (!cart) {
       return res.status(404).json({ message: "Compra não encontrada" });
     }
 
+    // Se o status anterior era "RECEIVED" e o novo status não for "RECEIVED", apagar a receita associada
+    if (cart.status === "RECEIVED" && status !== "RECEIVED") {
+      await FinancialTransaction.findOneAndDelete({ relatedCart: cart._id, type: "receita" });
+    }
+
+    // Atualizar o status da compra
+    cart.status = status;
+    await cart.save();
+
+    // Se o novo status for "RECEIVED", criar uma nova entrada de receita
+    if (status === "RECEIVED") {
+      const newTransaction = new FinancialTransaction({
+        type: "receita",
+        description: `Receita de venda: ${cart.name} - ${cart.category}`,
+        amount: cart.totalAmount,
+        relatedCart: cart._id,
+        createdAt: new Date(),
+      });
+
+      await newTransaction.save();
+    }
+
     // Retorna o carrinho atualizado como resposta
-    res.status(200).json({ message: `Status atualizado para '${status}'`, updatedCart });
+    res.status(200).json({ message: `Status atualizado para '${status}'`, cart });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Erro ao atualizar status da compra", error });
   }
 });
-
 module.exports = router;
