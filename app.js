@@ -21,6 +21,10 @@ const User = require('./routes/User');
 const cart = require('./routes/cart');
 const whatsapp = require('./routes/zenvia/whatsapp');
 
+const Instagram = require('./routes/zenvia/Instagram');
+const Facebook = require('./routes/zenvia/Facebook');
+
+
 
 const session = require('express-session');
 const passport = require('passport');
@@ -73,6 +77,8 @@ app.use('/api', Product);
 app.use('/api', User);
 app.use('/api', cart);
 app.use('/api', whatsapp);
+app.use('/api', Instagram);
+app.use('/api', Facebook);
 
 
 
