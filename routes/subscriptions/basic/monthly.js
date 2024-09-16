@@ -20,6 +20,14 @@ router.post("/monthly/subscription/pix/:customerId", async (req, res) => {
 
     // Find the asaasCustomerId of the customer
     const asaasCustomerId = customer.asaasCustomerId;
+  // Captura o IP do cliente
+  const clientIp =
+  req.headers["x-forwarded-for"]?.split(',').shift() ||  // Pega o primeiro IP da lista se houver múltiplos IPs
+  req.socket?.remoteAddress;  // IP direto do socket, caso o x-forwarded-for não exista
+
+console.log("X-Forwarded-For:", req.headers["x-forwarded-for"]); // Log para verificar IPs em x-forwarded-for
+console.log("Socket Remote Address:", req.socket?.remoteAddress); // Log para verificar o IP do socket
+console.log("Client IP Captured:", clientIp); // Log para verificar o IP capturado
 
     const data = {
       billingType: 'PIX',
@@ -28,9 +36,10 @@ router.post("/monthly/subscription/pix/:customerId", async (req, res) => {
       fine: { value: 1 },
       cycle: 'MONTHLY',
       customer: asaasCustomerId,
-      nextDueDate: '2024-07-29',
+      nextDueDate: '2024-09-16',
       value: 29.99,
       description: 'Assinatura Plano basico',
+      remoteIp: clientIp
     };
 
     console.log("Sending request with data:", data);

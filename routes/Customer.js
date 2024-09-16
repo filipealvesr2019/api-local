@@ -1,14 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const postmark = require("postmark");
-require('dotenv').config(); // Carrega as variáveis de ambiente do arquivo .env
+require("dotenv").config(); // Carrega as variáveis de ambiente do arquivo .env
 
 const postmarkKey = process.env.POSTMARK_API_KEY;
 const client = new postmark.ServerClient(postmarkKey);
 
 const Customer = require("../models/Customer"); // Importe o modelo do Customer
 const { default: axios } = require("axios");
-
 
 router.post("/signup", async (req, res) => {
   try {
@@ -98,15 +97,8 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-
-
-
-
-
 // Rota para visualizar um cliente específico pelo ID
 router.get("/customer/:customerId", async (req, res) => {
-  
-
   try {
     const existingUser = await Customer.findOne({
       customerId: req.params.customerId,
@@ -115,11 +107,11 @@ router.get("/customer/:customerId", async (req, res) => {
     res.status(200).json(existingUser);
   } catch (error) {
     console.error("Erro ao buscar cliente:", error);
-    res.status(500).json({ message: "Erro interno do servidor ao buscar cliente." });
+    res
+      .status(500)
+      .json({ message: "Erro interno do servidor ao buscar cliente." });
   }
 });
-
-
 
 router.post(
   "/creditCardWithoutTokenization",
@@ -128,41 +120,40 @@ router.post(
     try {
       const token = process.env.ACCESS_TOKEN;
       // Captura o IP do cliente
-  // Captura o IP do cliente
-  const clientIp =
-  req.headers["x-forwarded-for"]?.split(',').shift() ||  // Pega o primeiro IP da lista se houver múltiplos IPs
-  req.socket?.remoteAddress;  // IP direto do socket, caso o x-forwarded-for não exista
-
+      // Captura o IP do cliente
+      const clientIp =
+        req.headers["x-forwarded-for"]?.split(",").shift() || // Pega o primeiro IP da lista se houver múltiplos IPs
+        req.socket?.remoteAddress; // IP direto do socket, caso o x-forwarded-for não exista
 
       // Define a data de vencimento base
       const dueDate = new Date();
-    
+
       const payments = [];
       const paymentData = {
-        customer: 'cus_000006194383',
-    billingType: 'CREDIT_CARD',
-    dueDate: dueDate,
-    value: 100,
-    description: 'Pedido 056984',
-    externalReference: '056984',
-    creditCard: {
-      holderName: 'john doe',
-      number: '5162306219378829',
-      expiryMonth: '05',
-      expiryYear: '2025',
-      ccv: '318'
-    },
-    creditCardHolderInfo: {
-      name: 'John Doe',
-      email: 'john.doe@asaas.com.br',
-      cpfCnpj: '24971563792',
-      postalCode: '89223-005',
-      addressNumber: '277',
-      addressComplement: null,
-      phone: '(11) 5871-3757',
-      mobilePhone: ''
-    },
-    remoteIp: clientIp // Inclui o IP do cliente
+        customer: "cus_000006194383",
+        billingType: "CREDIT_CARD",
+        dueDate: dueDate,
+        value: 100,
+        description: "Pedido 056984",
+        externalReference: "056984",
+        creditCard: {
+          holderName: "john doe",
+          number: "5162306219378829",
+          expiryMonth: "05",
+          expiryYear: "2025",
+          ccv: "318",
+        },
+        creditCardHolderInfo: {
+          name: "John Doe",
+          email: "john.doe@asaas.com.br",
+          cpfCnpj: "24971563792",
+          postalCode: "89223-005",
+          addressNumber: "277",
+          addressComplement: null,
+          phone: "(11) 5871-3757",
+          mobilePhone: "",
+        },
+        remoteIp: clientIp, // Inclui o IP do cliente
 
         // remoteIp: clientIp, // Inclui o IP do cliente
       };
@@ -184,8 +175,6 @@ router.post(
       payments.push(paymentResponse);
 
       console.log("Payment Response:", paymentResponse);
-
-     
 
       res.json(payments);
     } catch (error) {
