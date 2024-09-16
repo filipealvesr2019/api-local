@@ -22,6 +22,7 @@ const cart = require('./routes/cart');
 const whatsapp = require('./routes/chatpro/Whatsapp');
 const FinancialTransaction = require('./routes/Financial/FinancialTransaction');
 
+const Categories = require('./routes/categories/Categories');
 
 
 
@@ -71,6 +72,7 @@ app.use('/api', User);
 app.use('/api', cart);
 app.use('/api', whatsapp);
 app.use('/api', FinancialTransaction);
+app.use('/api', Categories);
 
 
 
