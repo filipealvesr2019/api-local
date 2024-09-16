@@ -1,6 +1,11 @@
 const mongoose = require("mongoose");
 
 const financialTransactionSchema = new mongoose.Schema({
+    adminID: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Customer",
+        required: true,
+      },
   type: { type: String, enum: ["receita", "despesa"], required: true },
   description: { type: String, required: true },
   amount: { type: Number, required: true },

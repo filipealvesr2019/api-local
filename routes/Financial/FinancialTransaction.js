@@ -6,11 +6,12 @@ const router = express.Router();
 // Rota para criar uma nova receita
 // Rota para criar uma nova receita
 router.post("/receitas", async (req, res) => {
-    const { description, amount, relatedCart, category } = req.body;
+    const { description, amount, relatedCart, category, adminID } = req.body;
 
 
     try {
         const newTransaction = new FinancialTransaction({
+            adminID,
             type: "receita",
             description,
             amount,
@@ -53,11 +54,12 @@ router.get("/receitas", async (req, res) => {
 
   // Rota para criar uma nova despesa
 router.post("/despesas", async (req, res) => {
-    const { description, amount, relatedCart, category } = req.body;
+    const { description, amount, relatedCart, category, adminID } = req.body;
 
 
     try {
         const newTransaction = new FinancialTransaction({
+            adminID,
             type: "despesa",
             description,
             amount,
