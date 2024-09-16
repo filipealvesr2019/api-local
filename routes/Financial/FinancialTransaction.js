@@ -30,16 +30,16 @@ router.post("/receitas", async (req, res) => {
 
 
 
-// Rota para listar todas as receitas
-router.get("/receitas", async (req, res) => {
-    try {
-      const transactions = await FinancialTransaction.find({ type: "receita" });
-      res.status(200).json(transactions);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Erro ao listar receitas", error });
-    }
-  });
+// // Rota para listar todas as receitas
+// router.get("/receitas", async (req, res) => {
+//     try {
+//       const transactions = await FinancialTransaction.find({ type: "receita" });
+//       res.status(200).json(transactions);
+//     } catch (error) {
+//       console.error(error);
+//       res.status(500).json({ message: "Erro ao listar receitas", error });
+//     }
+//   });
   
 
 
@@ -77,16 +77,16 @@ router.post("/despesas", async (req, res) => {
 
 
 
-// Rota para listar todas as despesas
-router.get("/despesas", async (req, res) => {
-    try {
-      const transactions = await FinancialTransaction.find({ type: "despesa" });
-      res.status(200).json(transactions);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Erro ao listar receitas", error });
-    }
-  });
+// // Rota para listar todas as despesas
+// router.get("/despesas", async (req, res) => {
+//     try {
+//       const transactions = await FinancialTransaction.find({ type: "despesa" });
+//       res.status(200).json(transactions);
+//     } catch (error) {
+//       console.error(error);
+//       res.status(500).json({ message: "Erro ao listar receitas", error });
+//     }
+//   });
   
 
 
@@ -131,6 +131,85 @@ router.get("/saldo", async (req, res) => {
     }
 });
 
+// Rota para listar despesas do mês atual
+router.get("/transactions/expenses", async (req, res) => {
+    try {
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  
+      const expenses = await FinancialTransaction.find({
+        type: "despesa",
+        paymentDate: { $gte: startOfMonth, $lte: endOfMonth }
+      });
+  
+      res.status(200).json(expenses);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Rota para listar receitas do mês atual
+router.get("/transactions/income", async (req, res) => {
+    try {
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  
+      const income = await FinancialTransaction.find({
+        type: "receita",
+        paymentDate: { $gte: startOfMonth, $lte: endOfMonth }
+      });
+  
+      res.status(200).json(income);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
 
+
+  // Rota para obter o total de despesas do mês atual
+router.get("/transactions/total/expenses", async (req, res) => {
+    try {
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  
+      const totalExpenses = await FinancialTransaction.aggregate([
+        { $match: { type: "despesa", paymentDate: { $gte: startOfMonth, $lte: endOfMonth } } },
+        { $group: { _id: null, total: { $sum: "$amount" } } }
+      ]);
+  
+      res.status(200).json({
+        total: totalExpenses.length > 0 ? totalExpenses[0].total : 0
+      });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+
+
+  // Rota para obter o total de receitas do mês atual
+router.get("/transactions/total/income", async (req, res) => {
+    try {
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  
+      const totalIncome = await FinancialTransaction.aggregate([
+        { $match: { type: "receita", paymentDate: { $gte: startOfMonth, $lte: endOfMonth } } },
+        { $group: { _id: null, total: { $sum: "$amount" } } }
+      ]);
+  
+      res.status(200).json({
+        total: totalIncome.length > 0 ? totalIncome[0].total : 0
+      });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
   
 module.exports = router;
