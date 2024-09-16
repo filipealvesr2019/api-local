@@ -34,19 +34,19 @@ const passport = require('passport');
 app.use(bodyParser.json());
 app.use(cookieParser());
 // Configurações e middlewares
-app.use(cors({ origin: "*"}));
+// app.use(cors({ origin: "*"}));
 
-// app.use(cors({
-//   origin: [
-//     'http://localhost:5002',
-//     'http://localhost:5005',
-//     'https://front-end-local.vercel.app',
-//     'https://64f22388c1f395658e3d59cd7fc11988.serveo.net/',
-//     'https://local-front-end.vercel.app'
+app.use(cors({
+  origin: [
+    'http://localhost:5002',
+    'http://localhost:5005',
+    'https://front-end-local.vercel.app',
+    'https://64f22388c1f395658e3d59cd7fc11988.serveo.net/',
+    'https://local-front-end.vercel.app'
 
-//   ],
-//   credentials: true // Se você estiver usando cookies ou headers personalizados
-// }));
+  ],
+  credentials: true // Se você estiver usando cookies ou headers personalizados
+}));
 
 
 
