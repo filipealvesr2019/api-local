@@ -41,7 +41,7 @@ app.use(cors({
     'http://localhost:5002',
     'http://localhost:5005',
     'https://front-end-local.vercel.app',
-    'https://94a4-2804-1a04-804f-e800-e40d-39f4-ae62-e622.ngrok-free.app'
+    'https://1ebb-2804-1a04-804f-e800-ccba-cd15-961b-6945.ngrok-free.app/'
 
   ],
   credentials: true // Se você estiver usando cookies ou headers personalizados

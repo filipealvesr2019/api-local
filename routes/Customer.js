@@ -129,10 +129,11 @@ router.post(
       const token = process.env.ACCESS_TOKEN;
       // Captura o IP do cliente
       const clientIp =
-      req.headers["x-forwarded-for"] ||
-      req.connection.remoteAddress ||
-      req.socket.remoteAddress ||
-      req.connection.socket?.remoteAddress;
+      req.headers["x-forwarded-for"] ||  // Check if forwarded header exists
+      req.socket?.remoteAddress;         // Use socket to get IP address
+
+console.log("Client IP:", clientIp); // Log to check which IP is captured
+
 
     console.log("Client IP:", clientIp); // Log para verificar qual IP está sendo capturado
 
@@ -141,7 +142,7 @@ router.post(
     
       const payments = [];
       const paymentData = {
-        customer: 'cus_000006188865',
+        customer: 'cus_000006194383',
     billingType: 'CREDIT_CARD',
     dueDate: dueDate,
     value: 100,
