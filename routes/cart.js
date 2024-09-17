@@ -437,7 +437,12 @@ router.get("/produtos-mais-vendidos-relatorio/:storeID", async (req, res) => {
 // Rota para atualizar o status da compra para "RECEIVED" ou "PENDING"
 router.put("/compras/:cartId/status", async (req, res) => {
   const { cartId } = req.params; // ID da compra passada como parâmetro na URL
-  const { status } = req.body; // Status enviado no corpo da requisição
+  const { status, adminID  } = req.body; // Status enviado no corpo da requisição
+
+    // Verifica se o adminID é válido
+    if (!mongoose.Types.ObjectId.isValid(adminID)) {
+      return res.status(400).json({ message: "ID de administrador inválido." });
+    }
 
   // Verifica se o status enviado é válido
   const validStatuses = ["RECEIVED", "PENDING"];
@@ -466,6 +471,7 @@ router.put("/compras/:cartId/status", async (req, res) => {
     // Se o novo status for "RECEIVED", criar uma nova entrada de receita
     if (status === "RECEIVED") {
       const newTransaction = new FinancialTransaction({
+        adminID,
         type: "receita",
         description: `Receita de venda: ${cart.name} - ${cart.category}`,
         amount: cart.totalAmount,
