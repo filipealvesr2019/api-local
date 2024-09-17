@@ -1,33 +1,41 @@
 const express = require('express');
 const FinancialTransaction = require('../../models/Financial/FinancialTransaction');
 const { default: mongoose } = require('mongoose');
+const Category = require('../../models/categories/Categories');
 const router = express.Router();
 
 
 // Rota para criar uma nova receita
 // Rota para criar uma nova receita
-router.post("/receitas", async (req, res) => {
-    const { description, amount, relatedCart, category, adminID } = req.body;
 
+// Rota para criar uma nova despesa
+router.post("/despesas", async (req, res) => {
+  const { description, amount, relatedCart, category, adminID } = req.body;
 
-    try {
-        const newTransaction = new FinancialTransaction({
-            adminID,
-            type: "receita",
-            description,
-            amount,
-            relatedCart,
-            category
-        });
+  try {
+      // Buscar o nome da categoria
+      const categoryDoc = await Category.findById(category);
+      if (!categoryDoc) {
+          return res.status(400).json({ message: "Categoria não encontrada" });
+      }
 
-        await newTransaction.save();
-        res.status(201).json({ message: "Receita criada com sucesso.", newTransaction });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Erro ao criar receita", error });
-    }
+      const newTransaction = new FinancialTransaction({
+          adminID,
+          type: "despesa",
+          description,
+          amount,
+          relatedCart,
+          category,
+          categoryName: categoryDoc.name
+      });
+
+      await newTransaction.save();
+      res.status(201).json({ message: "Despesa criada com sucesso.", newTransaction });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Erro ao criar despesa", error });
+  }
 });
-
 
 
 // Rota para buscar receitas por adminID
@@ -57,38 +65,44 @@ router.get("/receitas/:adminID", async (req, res) => {
   }
 });
 
+// Rota para criar uma nova receita
+router.post("/receitas", async (req, res) => {
+  const { description, amount, relatedCart, category, adminID } = req.body;
 
+  try {
+      // Buscar o nome da categoria
+      const categoryDoc = await Category.findById(category);
+      if (!categoryDoc) {
+          return res.status(400).json({ message: "Categoria não encontrada" });
+      }
 
+      const newTransaction = new FinancialTransaction({
+          adminID,
+          type: "receita",
+          description,
+          amount,
+          relatedCart,
+          category,
+          categoryName: categoryDoc.name
+      });
 
-
-
-
-
-
-
-  // Rota para criar uma nova despesa
-router.post("/despesas", async (req, res) => {
-    const { description, amount, relatedCart, category, adminID } = req.body;
-
-
-    try {
-        const newTransaction = new FinancialTransaction({
-            adminID,
-            type: "despesa",
-            description,
-            amount,
-            relatedCart,
-            category
-        });
-
-        await newTransaction.save();
-        res.status(201).json({ message: "despesa criada com sucesso.", newTransaction });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Erro ao criar receita", error });
-    }
+      await newTransaction.save();
+      res.status(201).json({ message: "Receita criada com sucesso.", newTransaction });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Erro ao criar receita", error });
+  }
 });
 
+
+
+
+
+
+
+
+
+ 
 
 
 
