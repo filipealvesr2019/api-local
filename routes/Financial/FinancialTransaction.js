@@ -135,26 +135,25 @@ router.get("/despesas/:adminID", async (req, res) => {
 
 
 
-
-
-// Rota para listar todas as movimentações (receitas e despesas) e verificar se são positivas ou negativas
-router.get("/movimentacoes/:adminID", async (req, res) => {
+// Rota para obter todas as movimentações de receitas e despesas do mês por adminID
+router.get('/transactions/:adminID', async (req, res) => {
   try {
     const { adminID } = req.params;
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
 
-    if (!mongoose.Types.ObjectId.isValid(adminID)) {
-      return res.status(400).json({ message: "ID de administrador inválido." });
-    }
+    const endOfMonth = new Date(startOfMonth);
+    endOfMonth.setMonth(endOfMonth.getMonth() + 1);
 
-    const transactions = await FinancialTransaction.find({ adminID });
-    const categorizedTransactions = transactions.map(transaction => ({
-      ...transaction._doc,
-      isPositive: transaction.type === 'receita' ? transaction.amount > 0 : transaction.amount < 0
-    }));
-    res.status(200).json(categorizedTransactions);
+    const transactions = await FinancialTransaction.find({
+      adminID: adminID,
+      createdAt: { $gte: startOfMonth, $lt: endOfMonth }
+    }).exec();
+
+    res.status(200).json(transactions);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Erro ao listar movimentações", error });
+    res.status(500).json({ message: 'Erro ao buscar transações', error });
   }
 });
 
