@@ -91,17 +91,34 @@ router.post("/despesas", async (req, res) => {
 
 
 
-// // Rota para listar todas as despesas
-// router.get("/despesas", async (req, res) => {
-//     try {
-//       const transactions = await FinancialTransaction.find({ type: "despesa" });
-//       res.status(200).json(transactions);
-//     } catch (error) {
-//       console.error(error);
-//       res.status(500).json({ message: "Erro ao listar receitas", error });
-//     }
-//   });
-  
+
+// Rota para buscar receitas por adminID
+router.get("/despesas/:adminID", async (req, res) => {
+  try {
+    const { adminID } = req.params;
+    
+    // Verifica se adminID é um ObjectId válido
+    if (!mongoose.Types.ObjectId.isValid(adminID)) {
+      return res.status(400).json({ message: "ID de administrador inválido." });
+    }
+
+    // Busca as receitas do adminID
+    const receitas = await FinancialTransaction.find({
+      adminID: adminID,
+      type: "despesa"
+    }).populate("relatedCart category"); // Popula campos referenciados
+
+    if (!receitas.length) {
+      return res.status(404).json({ message: "Nenhuma despesa encontrada para este adminID." });
+    }
+
+    res.json(receitas);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erro ao buscar despesas." });
+  }
+});
+
 
 
 
