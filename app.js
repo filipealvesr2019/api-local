@@ -23,6 +23,7 @@ const whatsapp = require('./routes/chatpro/Whatsapp');
 const FinancialTransaction = require('./routes/Financial/FinancialTransaction');
 
 const Categories = require('./routes/categories/Categories');
+const MetaAPI = require('./routes/Meta API/whatsapp');
 
 
 
@@ -74,6 +75,7 @@ app.use('/api', whatsapp);
 app.use('/api', FinancialTransaction);
 app.use('/api', Categories);
 
+app.use('/api', MetaAPI);
 
 
 

@@ -4,6 +4,7 @@ const Product = require("../models/products/product");
 const UserForm = require("../models/UserForm");
 const { default: mongoose } = require("mongoose");
 const FinancialTransaction = require("../models/Financial/FinancialTransaction");
+
 const router = express.Router();
 const { ObjectId } = require('mongoose').Types;
 
@@ -482,4 +483,10 @@ router.put("/compras/:cartId/status", async (req, res) => {
     res.status(500).json({ message: "Erro ao atualizar status da compra", error });
   }
 });
+
+
+
+
+
+
 module.exports = router;

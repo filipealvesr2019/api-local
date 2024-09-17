@@ -1,5 +1,6 @@
 const express = require('express');
 const FinancialTransaction = require('../../models/Financial/FinancialTransaction');
+const { default: mongoose } = require('mongoose');
 const router = express.Router();
 
 
@@ -29,19 +30,32 @@ router.post("/receitas", async (req, res) => {
 
 
 
+// Rota para buscar receitas por adminID
+router.get("/receitas/:adminID", async (req, res) => {
+  try {
+    const { adminID } = req.params;
+    
+    // Verifica se adminID é um ObjectId válido
+    if (!mongoose.Types.ObjectId.isValid(adminID)) {
+      return res.status(400).json({ message: "ID de administrador inválido." });
+    }
 
-// // Rota para listar todas as receitas
-// router.get("/receitas", async (req, res) => {
-//     try {
-//       const transactions = await FinancialTransaction.find({ type: "receita" });
-//       res.status(200).json(transactions);
-//     } catch (error) {
-//       console.error(error);
-//       res.status(500).json({ message: "Erro ao listar receitas", error });
-//     }
-//   });
-  
+    // Busca as receitas do adminID
+    const receitas = await FinancialTransaction.find({
+      adminID: adminID,
+      type: "receita"
+    }).populate("relatedCart category"); // Popula campos referenciados
 
+    if (!receitas.length) {
+      return res.status(404).json({ message: "Nenhuma receita encontrada para este adminID." });
+    }
+
+    res.json(receitas);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erro ao buscar receitas." });
+  }
+});
 
 
 
