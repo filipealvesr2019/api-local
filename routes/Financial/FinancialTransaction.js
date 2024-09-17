@@ -82,7 +82,7 @@ router.post("/despesas", async (req, res) => {
         });
 
         await newTransaction.save();
-        res.status(201).json({ message: "Receita criada com sucesso.", newTransaction });
+        res.status(201).json({ message: "despesa criada com sucesso.", newTransaction });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Erro ao criar receita", error });
