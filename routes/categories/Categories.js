@@ -3,31 +3,47 @@ const Category = require("../../models/categories/Categories");
 const router = express.Router();
 
 // Criar uma nova categoria
+// Rota para criar uma nova categoria
 router.post("/categories", async (req, res) => {
   try {
-    const {adminID, name, type } = req.body;
-    
-    // Verifica se a categoria já existe
+    const { adminID, name, type } = req.body;
+
+    // Verifica se a categoria já existe para este adminID
     const existingCategory = await Category.findOne({ name, adminID });
     if (existingCategory) {
       return res.status(400).json({ message: "Categoria já existe." });
     }
 
-    const category = new Category({ name, type });
+    // Cria uma nova categoria associada ao adminID
+    const category = new Category({ adminID, name, type });
     await category.save();
+
     res.status(201).json(category);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// Listar todas as categorias
-router.get("/categories", async (req, res) => {
+
+
+// Rota para listar categorias por adminID
+router.get("/categories/:adminID", async (req, res) => {
+  const { adminID } = req.params;
+
   try {
-    const categories = await Category.find();
+    // Busca categorias pelo adminID
+    const categories = await Category.find({ adminID });
+
+    // Verifica se há categorias
+    if (!categories.length) {
+      return res.status(404).json({ message: "Nenhuma categoria encontrada para este adminID" });
+    }
+
+    // Retorna as categorias encontradas
     res.status(200).json(categories);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    // Lida com erros e responde com status 500
+    res.status(500).json({ message: "Erro ao buscar categorias", error });
   }
 });
 
