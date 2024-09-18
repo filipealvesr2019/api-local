@@ -184,7 +184,6 @@ router.get("/saldo", async (req, res) => {
 
 
 
-
 router.get('/profit-percentage/mes/:adminID', async (req, res) => {
   try {
     const { adminID } = req.params;
@@ -222,13 +221,15 @@ router.get('/profit-percentage/mes/:adminID', async (req, res) => {
 
     let percentageChange = 0;
     if (previousMonthProfit !== 0) {
-      percentageChange = ((currentMonthProfit - previousMonthProfit) / previousMonthProfit) * 100;
+      percentageChange = ((currentMonthProfit - previousMonthProfit) / Math.abs(previousMonthProfit)) * 100;
+    } else {
+      percentageChange = currentMonthProfit > 0 ? 100 : -100;
     }
 
     res.json({
       currentMonthProfit,
       previousMonthProfit,
-      percentageChange
+      percentageChange: percentageChange.toFixed(2)
     });
 
   } catch (error) {
@@ -237,15 +238,9 @@ router.get('/profit-percentage/mes/:adminID', async (req, res) => {
 });
 
 
-
-
-
 const calculateProfitForDay = async (adminID, day) => {
   const startOfDay = new Date(day.setHours(0, 0, 0, 0));
   const endOfDay = new Date(day.setHours(23, 59, 59, 999));
-
-  console.log("Start of Day:", startOfDay);
-  console.log("End of Day:", endOfDay);
 
   const transactions = await FinancialTransaction.find({
     adminID,
@@ -263,7 +258,6 @@ const calculateProfitForDay = async (adminID, day) => {
       despesa += transaction.amount;
     }
   });
-
 
   return receita - despesa; // Lucro do dia
 };
@@ -283,10 +277,8 @@ router.get('/lucro/dia/:adminID', async (req, res) => {
 
     let percentageChange = 0;
 
-    // Verifica se os lucros de hoje e ontem são ambos zero
-    if (lucroHoje === 0 && lucroOntem === 0) {
-      percentageChange = 0;
-    } else if (lucroOntem !== 0) {
+    // Verifica se o lucro de ontem é zero
+    if (lucroOntem !== 0) {
       // Calcula a porcentagem de diferença entre o lucro de ontem e hoje
       percentageChange = ((lucroHoje - lucroOntem) / Math.abs(lucroOntem)) * 100;
     } else {
@@ -320,8 +312,6 @@ router.get('/lucro/dia/:adminID', async (req, res) => {
 
 
 
-
-
 router.get('/despesas-por-mes/:adminID', async (req, res) => {
   try {
     const { adminID } = req.params;
@@ -336,6 +326,7 @@ router.get('/despesas-por-mes/:adminID', async (req, res) => {
       const transactions = await FinancialTransaction.find({
         adminID,
         type: 'despesa',
+        status: 'RECEIVED',
         createdAt: { $gte: start, $lt: end }
       });
 
