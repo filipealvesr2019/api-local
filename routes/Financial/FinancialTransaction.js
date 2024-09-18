@@ -134,6 +134,44 @@ router.get("/receitas/mes/:adminID", async (req, res) => {
 });
 
 
+router.get("/despesas/mes/:adminID", async (req, res) => {
+  try {
+    const { adminID } = req.params;
+
+    // Verifica se adminID é um ObjectId válido
+    if (!mongoose.Types.ObjectId.isValid(adminID)) {
+      return res.status(400).json({ message: "ID de administrador inválido." });
+    }
+
+    // Obtém o ano e mês atuais
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth(); // Note que getMonth() retorna 0 para janeiro e 11 para dezembro
+
+    // Ajusta para o início e o fim do mês atual
+    const startOfMonth = new Date(Date.UTC(year, month, 1)); // Início do mês
+    const endOfMonth = new Date(Date.UTC(year, month + 1, 0, 23, 59, 59)); // Fim do mês
+
+    // Busca as despesas do adminID dentro do mês atual
+    const despesas = await FinancialTransaction.find({
+      adminID: adminID,
+      type: "despesa",
+      createdAt: {
+        $gte: startOfMonth,
+        $lte: endOfMonth
+      }
+    }).populate("relatedCart category");
+
+    if (!despesas.length) {
+      return res.status(404).json({ message: "Nenhuma despesa encontrada para este mês." });
+    }
+
+    res.json(despesas);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erro ao buscar despesas." });
+  }
+});
 
 
 // Rota para buscar receitas por adminID
