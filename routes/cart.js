@@ -134,92 +134,6 @@ router.get("/admin/vendas/:storeID", async (req, res) => {
 
 
 
-// Rota para calcular o total ganho no mesmo dia
-router.get("/admin/vendas/total-dia/:storeID", async (req, res) => {
-  try {
-    const { storeID } = req.params;
-
-    // Pega a data atual
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Define a hora para o início do dia
-
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1); // Data do próximo dia para o intervalo
-
-    // Filtra por storeID, status 'received' e compras feitas no mesmo dia
-    const vendasDoDia = await Cart.aggregate([
-      {
-        $match: {
-          storeID: new mongoose.Types.ObjectId(storeID),
-          status: "RECEIVED",
-          purchaseDate: {
-            $gte: today, // Compras feitas hoje
-            $lt: tomorrow, // Exclui o próximo dia
-          },
-        },
-      },
-      {
-        $group: {
-          _id: null, // Não agrupamos por nenhum campo, apenas somamos
-          totalGanho: { $sum: "$totalAmount" }, // Soma os totalAmount
-        },
-      },
-    ]);
-
-    if (vendasDoDia.length === 0) {
-      return res.status(200).json({ totalGanho: 0 });
-    }
-
-    // Retorna o total ganho
-    res.status(200).json({ totalGanho: vendasDoDia[0].totalGanho });
-  } catch (error) {
-    console.error("Erro ao calcular o total de vendas do dia:", error);
-    res.status(500).json({ message: "Erro ao calcular o total", error });
-  }
-});
-
-router.get("/admin/vendas/total-mes/:storeID", async (req, res) => {
-  try {
-    const { storeID } = req.params;
-
-    // Pega o primeiro e o último dia do mês atual
-    const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-    const lastDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0);
-
-    // Filtra por storeID, status 'RECEIVED' e compras feitas no mês atual
-    const vendasDoMes = await Cart.aggregate([
-      {
-        $match: {
-          storeID: new mongoose.Types.ObjectId(storeID),
-          status: "RECEIVED", // Certifique-se de que o status é exatamente "RECEIVED"
-          purchaseDate: {
-            $gte: firstDayOfMonth, // Compras a partir do primeiro dia do mês
-            $lte: lastDayOfMonth, // Compras até o último dia do mês
-          },
-        },
-      },
-      {
-        $group: {
-          _id: null, // Não agrupamos por nenhum campo, apenas somamos
-          totalGanho: { $sum: "$totalAmount" }, // Soma os totalAmount, que é o valor total da compra
-        },
-      },
-    ]);
-
-    // Verifica se há vendas no mês
-    if (vendasDoMes.length === 0) {
-      return res.status(200).json({ totalGanho: 0 });
-    }
-
-    // Retorna o total ganho no mês
-    res.status(200).json({ totalGanho: vendasDoMes[0].totalGanho });
-  } catch (error) {
-    console.error("Erro ao calcular o total de vendas do mês:", error);
-    res.status(500).json({ message: "Erro ao calcular o total do mês", error });
-  }
-});
-
-
 
 router.get("/vendas/total-ano/:storeID", async (req, res) => {
   try {
@@ -475,6 +389,7 @@ router.put("/compras/:cartId/status", async (req, res) => {
         type: "receita",
         description: `Receita de venda: ${cart.name} - ${cart.category}`,
         amount: cart.totalAmount,
+        status: "RECEIVED",
         relatedCart: cart._id,
         createdAt: new Date(),
       });

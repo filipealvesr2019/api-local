@@ -240,12 +240,12 @@ router.get('/profit-percentage/mes/:adminID', async (req, res) => {
 
 
 
-
-
-// Função para calcular o lucro de um dia específico
 const calculateProfitForDay = async (adminID, day) => {
   const startOfDay = new Date(day.setHours(0, 0, 0, 0));
   const endOfDay = new Date(day.setHours(23, 59, 59, 999));
+
+  console.log("Start of Day:", startOfDay);
+  console.log("End of Day:", endOfDay);
 
   const transactions = await FinancialTransaction.find({
     adminID,
@@ -264,6 +264,9 @@ const calculateProfitForDay = async (adminID, day) => {
     }
   });
 
+  console.log("Receita:", receita);
+  console.log("Despesa:", despesa);
+
   return receita - despesa; // Lucro do dia
 };
 
@@ -281,7 +284,6 @@ router.get('/lucro/dia/:adminID', async (req, res) => {
     const lucroOntem = await calculateProfitForDay(adminID, yesterday);
 
     let percentageChange = 0;
-    let message = '';
 
     // Verifica se os lucros de hoje e ontem são ambos zero
     if (lucroHoje === 0 && lucroOntem === 0) {
@@ -295,6 +297,7 @@ router.get('/lucro/dia/:adminID', async (req, res) => {
     }
 
     // Mensagem baseada na variação percentual
+    let message = '';
     if (percentageChange > 0) {
       message = `Lucro aumentou ${percentageChange.toFixed(2)}% em relação ao dia anterior.`;
     } else if (percentageChange < 0) {
