@@ -185,7 +185,7 @@ router.get("/saldo", async (req, res) => {
 
 
 
-router.get('/profit-percentage/:adminID', async (req, res) => {
+router.get('/profit-percentage/mes/:adminID', async (req, res) => {
   try {
     const { adminID } = req.params;
     const now = new Date();
@@ -235,5 +235,6 @@ router.get('/profit-percentage/:adminID', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 module.exports = router;
