@@ -120,7 +120,9 @@ router.get("/receitas/mes/:adminID", async (req, res) => {
         $gte: startOfMonth,
         $lte: endOfMonth
       }
-    }).populate("relatedCart category");
+    })
+    .sort({ createdAt: -1 }) // Ordena de forma decrescente
+    .populate("relatedCart category");
 
     if (!receitas.length) {
       return res.status(404).json({ message: "Nenhuma receita encontrada para este mês." });
@@ -160,7 +162,9 @@ router.get("/despesas/mes/:adminID", async (req, res) => {
         $gte: startOfMonth,
         $lte: endOfMonth
       }
-    }).populate("relatedCart category");
+    })
+    .sort({ createdAt: -1 }) // Ordena de forma decrescente
+    .populate("relatedCart category");
 
     if (!despesas.length) {
       return res.status(404).json({ message: "Nenhuma despesa encontrada para este mês." });
@@ -204,7 +208,7 @@ router.get("/despesas/:adminID", async (req, res) => {
 
 
 // Rota para obter todas as movimentações de receitas e despesas do mês por adminID
-router.get('/transactions/:adminID', async (req, res) => {
+router.get('/transactions/mes/:adminID', async (req, res) => {
   try {
     const { adminID } = req.params;
     const startOfMonth = new Date();
@@ -217,7 +221,7 @@ router.get('/transactions/:adminID', async (req, res) => {
     const transactions = await FinancialTransaction.find({
       adminID: adminID,
       createdAt: { $gte: startOfMonth, $lt: endOfMonth }
-    }).exec();
+    }).sort({ createdAt: -1 }).exec();
 
     res.status(200).json(transactions);
   } catch (error) {
