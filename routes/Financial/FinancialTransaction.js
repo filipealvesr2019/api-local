@@ -430,4 +430,34 @@ router.get('/despesas-por-mes/:adminID', async (req, res) => {
 });
 
 
+// Rota para atualizar o status de uma transação
+router.put('/transactions/status/:adminID/:transactionID', async (req, res) => {
+  try {
+    const { adminID, transactionID } = req.params;
+    const { status } = req.body;
+
+    // Verifica se adminID e transactionID são ObjectIds válidos
+    if (!mongoose.Types.ObjectId.isValid(adminID) || !mongoose.Types.ObjectId.isValid(transactionID)) {
+      return res.status(400).json({ message: "ID de administrador ou de transação inválido." });
+    }
+
+    // Atualiza o status da transação com base no transactionID e adminID
+    const updatedTransaction = await FinancialTransaction.findOneAndUpdate(
+      { _id: transactionID, adminID: adminID },
+      { status: status },
+      { new: true } // Retorna o documento atualizado
+    );
+
+    if (!updatedTransaction) {
+      return res.status(404).json({ message: "Transação não encontrada." });
+    }
+
+    res.status(200).json({ message: "Status atualizado com sucesso.", updatedTransaction });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erro ao atualizar o status da transação." });
+  }
+});
+
+
 module.exports = router;
