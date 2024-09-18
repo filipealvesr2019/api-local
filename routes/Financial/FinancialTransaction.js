@@ -237,4 +237,84 @@ router.get('/profit-percentage/mes/:adminID', async (req, res) => {
 });
 
 
+
+
+
+
+
+// Função para calcular o lucro de um dia específico
+const calculateProfitForDay = async (adminID, day) => {
+  const startOfDay = new Date(day.setHours(0, 0, 0, 0));
+  const endOfDay = new Date(day.setHours(23, 59, 59, 999));
+
+  const transactions = await FinancialTransaction.find({
+    adminID,
+    status: 'RECEIVED',
+    createdAt: { $gte: startOfDay, $lte: endOfDay },
+  });
+
+  let receita = 0;
+  let despesa = 0;
+
+  transactions.forEach((transaction) => {
+    if (transaction.type === 'receita') {
+      receita += transaction.amount;
+    } else if (transaction.type === 'despesa') {
+      despesa += transaction.amount;
+    }
+  });
+
+  return receita - despesa; // Lucro do dia
+};
+
+// Rota para calcular a porcentagem de lucro
+router.get('/lucro/dia/:adminID', async (req, res) => {
+  const { adminID } = req.params;
+
+  try {
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+
+    // Calcula o lucro do dia de hoje e do dia anterior
+    const lucroHoje = await calculateProfitForDay(adminID, today);
+    const lucroOntem = await calculateProfitForDay(adminID, yesterday);
+
+    let percentageChange = 0;
+    let message = '';
+
+    // Verifica se os lucros de hoje e ontem são ambos zero
+    if (lucroHoje === 0 && lucroOntem === 0) {
+      percentageChange = 0;
+    } else if (lucroOntem !== 0) {
+      // Calcula a porcentagem de diferença entre o lucro de ontem e hoje
+      percentageChange = ((lucroHoje - lucroOntem) / Math.abs(lucroOntem)) * 100;
+    } else {
+      // Se o lucro de ontem for zero, baseia-se no lucro de hoje
+      percentageChange = lucroHoje > 0 ? 100 : -100;
+    }
+
+    // Mensagem baseada na variação percentual
+    if (percentageChange > 0) {
+      message = `Lucro aumentou ${percentageChange.toFixed(2)}% em relação ao dia anterior.`;
+    } else if (percentageChange < 0) {
+      message = `Lucro diminuiu ${Math.abs(percentageChange.toFixed(2))}% em relação ao dia anterior.`;
+    } else {
+      message = 'Nenhuma variação no lucro em relação ao dia anterior.';
+    }
+
+    // Resposta JSON com os dados
+    res.json({
+      lucroHoje,
+      lucroOntem,
+      percentageChange: percentageChange.toFixed(2),
+      message,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Erro ao calcular lucro');
+  }
+});
+
+
 module.exports = router;
