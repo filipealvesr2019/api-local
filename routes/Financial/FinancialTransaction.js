@@ -264,8 +264,6 @@ const calculateProfitForDay = async (adminID, day) => {
     }
   });
 
-  console.log("Receita:", receita);
-  console.log("Despesa:", despesa);
 
   return receita - despesa; // Lucro do dia
 };
@@ -316,6 +314,55 @@ router.get('/lucro/dia/:adminID', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).send('Erro ao calcular lucro');
+  }
+});
+
+
+
+
+
+
+router.get('/despesas-por-mes/:adminID', async (req, res) => {
+  try {
+    const { adminID } = req.params;
+    const now = new Date();
+    const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfPreviousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfCurrentMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const endOfPreviousMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+
+    // Função para calcular despesas
+    const calculateExpenses = async (start, end) => {
+      const transactions = await FinancialTransaction.find({
+        adminID,
+        type: 'despesa',
+        createdAt: { $gte: start, $lt: end }
+      });
+
+      let totalExpenses = 0;
+      transactions.forEach(transaction => {
+        totalExpenses += transaction.amount;
+      });
+
+      return totalExpenses;
+    };
+
+    const currentMonthExpenses = await calculateExpenses(startOfCurrentMonth, endOfCurrentMonth);
+    const previousMonthExpenses = await calculateExpenses(startOfPreviousMonth, endOfPreviousMonth);
+
+    let percentageChange = 0;
+    if (previousMonthExpenses !== 0) {
+      percentageChange = ((currentMonthExpenses - previousMonthExpenses) / previousMonthExpenses) * 100;
+    }
+
+    res.json({
+      currentMonthExpenses,
+      previousMonthExpenses,
+      percentageChange: percentageChange.toFixed(2) // Formata a porcentagem com duas casas decimais
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
