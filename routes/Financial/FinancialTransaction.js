@@ -183,5 +183,57 @@ router.get("/saldo", async (req, res) => {
 });
 
 
-  
+
+
+router.get('/profit-percentage/:adminID', async (req, res) => {
+  try {
+    const { adminID } = req.params;
+    const now = new Date();
+    const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfPreviousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const startOfMonthBeforePrevious = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+    const endOfCurrentMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const endOfPreviousMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+    
+    // Função para calcular lucro
+    const calculateProfit = async (start, end) => {
+      const transactions = await FinancialTransaction.find({
+        adminID,
+        status: 'RECEIVED',
+        createdAt: { $gte: start, $lt: end }
+      });
+
+      let revenue = 0;
+      let expense = 0;
+
+      transactions.forEach(transaction => {
+        if (transaction.type === 'receita') {
+          revenue += transaction.amount;
+        } else if (transaction.type === 'despesa') {
+          expense += transaction.amount;
+        }
+      });
+
+      return revenue - expense;
+    };
+
+    const currentMonthProfit = await calculateProfit(startOfCurrentMonth, endOfCurrentMonth);
+    const previousMonthProfit = await calculateProfit(startOfPreviousMonth, endOfPreviousMonth);
+
+    let percentageChange = 0;
+    if (previousMonthProfit !== 0) {
+      percentageChange = ((currentMonthProfit - previousMonthProfit) / previousMonthProfit) * 100;
+    }
+
+    res.json({
+      currentMonthProfit,
+      previousMonthProfit,
+      percentageChange
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
