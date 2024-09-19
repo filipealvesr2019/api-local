@@ -729,4 +729,58 @@ router.get("/diferenca/mensal/:adminID", async (req, res) => {
   }
 });
 
+// Rota para obter a diferença entre receitas e despesas do dia
+router.get('/diferenca/dia/:adminID', async (req, res) => {
+  const { adminID } = req.params;
+
+  try {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const diferencaDiaria = await FinancialTransaction.aggregate([
+      {
+        // Filtra por adminID, status 'RECEIVED' e data do dia atual
+        $match: {
+          adminID: new mongoose.Types.ObjectId(adminID),
+          status: "RECEIVED",
+          createdAt: { $gte: startOfDay, $lt: endOfDay }
+        }
+      },
+      {
+        // Agrupa por tipo de transação
+        $group: {
+          _id: null,
+          totalReceitas: {
+            $sum: {
+              $cond: [{ $eq: ["$type", "receita"] }, "$amount", 0]
+            }
+          },
+          totalDespesas: {
+            $sum: {
+              $cond: [{ $eq: ["$type", "despesa"] }, "$amount", 0]
+            }
+          }
+        }
+      },
+      {
+        // Calcula a diferença entre receitas e despesas
+        $project: {
+          _id: 0,
+          totalReceitas: 1,
+          totalDespesas: 1,
+          diferenca: { $subtract: ["$totalReceitas", "$totalDespesas"] } // Receita - Despesa
+        }
+      }
+    ]);
+
+    res.json(diferencaDiaria[0] || { totalReceitas: 0, totalDespesas: 0, diferenca: 0 });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erro ao obter a diferença diária" });
+  }
+});
+
 module.exports = router;
