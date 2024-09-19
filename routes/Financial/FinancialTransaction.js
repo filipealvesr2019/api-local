@@ -219,6 +219,33 @@ router.get("/despesas/mes/:adminID", async (req, res) => {
   }
 });
 
+router.get("/receitas/tudo/:adminID", async (req, res) => {
+  try {
+    const { adminID } = req.params;
+
+    // Verifica se adminID é um ObjectId válido
+    if (!mongoose.Types.ObjectId.isValid(adminID)) {
+      return res.status(400).json({ message: "ID de administrador inválido." });
+    }
+
+    // Busca todas as receitas associadas ao adminID
+    const receitas = await FinancialTransaction.find({
+      adminID: adminID,
+      type: "receita"
+    })
+    .sort({ createdAt: -1 }) // Ordena de forma decrescente pela data de criação
+    .populate("relatedCart category");
+
+    if (!receitas.length) {
+      return res.status(404).json({ message: "Nenhuma receita encontrada." });
+    }
+
+    res.json(receitas);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erro ao buscar receitas." });
+  }
+});
 
 // Rota para buscar receitas por adminID
 router.get("/despesas/:adminID", async (req, res) => {
