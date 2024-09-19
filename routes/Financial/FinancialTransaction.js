@@ -460,4 +460,89 @@ router.put('/transactions/status/:adminID/:transactionID', async (req, res) => {
 });
 
 
+
+// Rota para obter o valor total de despesas por mês filtrado por adminID
+router.get("/despesas/mensais/:adminID", async (req, res) => {
+  const { adminID } = req.params;
+
+  try {
+    const despesasMensais = await FinancialTransaction.aggregate([
+      {
+        // Filtra por adminID e tipo 'despesa'
+        $match: {
+          adminID: new mongoose.Types.ObjectId(adminID),
+          type: "despesa",
+          status: "RECEIVED"
+        }
+      },
+      {
+        // Agrupa por ano e mês de paymentDate
+        $group: {
+          _id: {
+            year: { $year: "$paymentDate" },
+            month: { $month: "$paymentDate" }
+          },
+          totalDespesas: { $sum: "$amount" }, // Soma o valor total das despesas
+        }
+      },
+      {
+        // Ordena por ano e mês
+        $sort: { "_id.year": 1, "_id.month": 1 }
+      }
+    ]);
+
+    res.json(despesasMensais);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erro ao obter despesas mensais" });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+// Rota para obter o valor total de despesas por mês filtrado por adminID
+router.get("/receitas/mensais/:adminID", async (req, res) => {
+  const { adminID } = req.params;
+
+  try {
+    const receitasMensais = await FinancialTransaction.aggregate([
+      {
+        // Filtra por adminID e tipo 'despesa'
+        $match: {
+          adminID: new mongoose.Types.ObjectId(adminID),
+          type: "receita",
+          status: "RECEIVED"
+
+        }
+      },
+      {
+        // Agrupa por ano e mês de paymentDate
+        $group: {
+          _id: {
+            year: { $year: "$paymentDate" },
+            month: { $month: "$paymentDate" }
+          },
+          totalReceitas: { $sum: "$amount" }, // Soma o valor total das despesas
+        }
+      },
+      {
+        // Ordena por ano e mês
+        $sort: { "_id.year": 1, "_id.month": 1 }
+      }
+    ]);
+
+    res.json(receitasMensais);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erro ao obter despesas mensais" });
+  }
+});
+
 module.exports = router;
