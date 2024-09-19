@@ -653,4 +653,66 @@ router.get("/receitas/dia/:adminID", async (req, res) => {
   }
 });
 
+
+
+
+
+
+
+
+
+// Rota para obter a diferença entre receitas e despesas por mês
+router.get("/diferenca/mensal/:adminID", async (req, res) => {
+  const { adminID } = req.params;
+
+  try {
+    const diferencaMensal = await FinancialTransaction.aggregate([
+      {
+        // Filtra por adminID e status 'RECEIVED'
+        $match: {
+          adminID: new mongoose.Types.ObjectId(adminID),
+          status: "RECEIVED"
+        }
+      },
+      {
+        // Agrupa por ano e mês de paymentDate
+        $group: {
+          _id: {
+            year: { $year: "$paymentDate" },
+            month: { $month: "$paymentDate" }
+          },
+          totalReceitas: {
+            $sum: {
+              $cond: [{ $eq: ["$type", "receita"] }, "$amount", 0]
+            }
+          },
+          totalDespesas: {
+            $sum: {
+              $cond: [{ $eq: ["$type", "despesa"] }, "$amount", 0]
+            }
+          }
+        }
+      },
+      {
+        // Calcula a diferença entre receitas e despesas
+        $project: {
+          _id: 1,
+          totalReceitas: 1,
+          totalDespesas: 1,
+          diferenca: { $subtract: ["$totalReceitas", "$totalDespesas"] } // Receita - Despesa
+        }
+      },
+      {
+        // Ordena por ano e mês
+        $sort: { "_id.year": 1, "_id.month": 1 }
+      }
+    ]);
+
+    res.json(diferencaMensal);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erro ao obter a diferença mensal" });
+  }
+});
+
 module.exports = router;
