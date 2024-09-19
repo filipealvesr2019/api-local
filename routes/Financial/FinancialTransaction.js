@@ -136,6 +136,48 @@ router.get("/receitas/mes/:adminID", async (req, res) => {
 });
 
 
+router.get("/receitas/dia/:adminID", async (req, res) => {
+  try {
+    const { adminID } = req.params;
+
+    // Verifica se adminID é um ObjectId válido
+    if (!mongoose.Types.ObjectId.isValid(adminID)) {
+      return res.status(400).json({ message: "ID de administrador inválido." });
+    }
+
+    // Pega a data atual (UTC)
+    const now = new Date();
+    
+    // Define o início do dia (meia-noite)
+    const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0));
+    
+    // Define o final do dia (23:59:59)
+    const endOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59));
+
+    // Busca as receitas do adminID no dia atual
+    const receitas = await FinancialTransaction.find({
+      adminID: adminID,
+      type: "receita",
+      createdAt: {
+        $gte: startOfDay,
+        $lte: endOfDay
+      }
+    })
+    .sort({ createdAt: -1 }) // Ordena de forma decrescente
+    .populate("relatedCart category");
+
+    if (!receitas.length) {
+      return res.status(404).json({ message: "Nenhuma receita encontrada para hoje." });
+    }
+
+    res.json(receitas);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erro ao buscar receitas." });
+  }
+});
+
+
 router.get("/despesas/mes/:adminID", async (req, res) => {
   try {
     const { adminID } = req.params;
@@ -782,5 +824,8 @@ router.get('/diferenca/dia/:adminID', async (req, res) => {
     res.status(500).json({ message: "Erro ao obter a diferença diária" });
   }
 });
+
+
+
 
 module.exports = router;
