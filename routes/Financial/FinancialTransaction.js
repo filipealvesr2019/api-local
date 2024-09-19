@@ -230,32 +230,46 @@ router.get('/transactions/mes/:adminID', async (req, res) => {
     res.status(500).json({ message: 'Erro ao buscar transações', error });
   }
 });
+// Rota para obter todas as movimentações de receitas e despesas do dia por adminID
+router.get('/transactions/dia/:adminID', async (req, res) => {
+  try {
+    const { adminID } = req.params;
 
+    // Obter o início do dia (meia-noite)
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
 
-// Rota para obter o saldo atual
-router.get("/saldo", async (req, res) => {
-    try {
-        const receitas = await FinancialTransaction.aggregate([
-            { $match: { type: 'receita' } },
-            { $group: { _id: null, total: { $sum: '$amount' } } }
-        ]);
+    // Obter o final do dia (23:59:59)
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
 
-        const despesas = await FinancialTransaction.aggregate([
-            { $match: { type: 'despesa' } },
-            { $group: { _id: null, total: { $sum: '$amount' } } }
-        ]);
+    const transactions = await FinancialTransaction.find({
+      adminID: adminID,
+      createdAt: { $gte: startOfDay, $lt: endOfDay },
+      status: "RECEIVED"
+    }).sort({ createdAt: -1 }).exec();
 
-        const totalReceitas = receitas.length > 0 ? receitas[0].total : 0;
-        const totalDespesas = despesas.length > 0 ? despesas[0].total : 0;
-        const saldoAtual = totalReceitas - totalDespesas;
-
-        res.status(200).json({ saldoAtual });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Erro ao calcular saldo", error });
-    }
+    res.status(200).json(transactions);
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao buscar transações', error });
+  }
 });
+// Rota para obter todas as movimentações por adminID
+router.get('/transactions/tudo/:adminID', async (req, res) => {
+  try {
+    const { adminID } = req.params;
 
+    // Buscar todas as transações para o adminID
+    const transactions = await FinancialTransaction.find({
+      adminID: adminID,
+      status: "RECEIVED" // Filtra por status se necessário
+    }).sort({ createdAt: -1 }).exec();
+
+    res.status(200).json(transactions);
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao buscar transações', error });
+  }
+});
 
 
 router.get('/profit-percentage/mes/:adminID', async (req, res) => {
