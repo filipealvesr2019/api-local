@@ -220,7 +220,9 @@ router.get('/transactions/mes/:adminID', async (req, res) => {
 
     const transactions = await FinancialTransaction.find({
       adminID: adminID,
-      createdAt: { $gte: startOfMonth, $lt: endOfMonth }
+      createdAt: { $gte: startOfMonth, $lt: endOfMonth },
+      status: "RECEIVED"
+
     }).sort({ createdAt: -1 }).exec();
 
     res.status(200).json(transactions);
