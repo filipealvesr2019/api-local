@@ -387,11 +387,12 @@ router.put("/compras/:cartId/status", async (req, res) => {
       const newTransaction = new FinancialTransaction({
         adminID,
         type: "receita",
-        description: `Receita de venda: ${cart.name} - ${cart.category}`,
+        description: `Receita de venda: ${cart.name}`,
         amount: cart.totalAmount,
         status: "RECEIVED",
         relatedCart: cart._id,
         createdAt: new Date(),
+        categoryName: cart.category
       });
 
       await newTransaction.save();
