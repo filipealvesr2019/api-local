@@ -882,6 +882,49 @@ router.get('/diferenca/dia/:adminID', async (req, res) => {
 });
 
 
+// Rota para deletar uma receita
+router.delete('/receitas/:adminID/:id', async (req, res) => {
+  const { adminID, id } = req.params;
 
+  try {
+    const receita = await FinancialTransaction.findOneAndDelete({
+      _id: id,
+      adminID: adminID,
+    });
+
+    if (!receita) {
+      return res.status(404).json({ message: 'Receita não encontrada.' });
+    }
+
+    return res.status(200).json({ message: 'Receita deletada com sucesso.' });
+  } catch (error) {
+    console.error('Erro ao deletar receita:', error);
+    return res.status(500).json({ message: 'Erro interno do servidor.' });
+  }
+});
+
+
+
+
+// Rota para deletar uma despesa
+router.delete('/despesas/:adminID/:id', async (req, res) => {
+  const { adminID, id } = req.params;
+
+  try {
+    const receita = await FinancialTransaction.findOneAndDelete({
+      _id: id,
+      adminID: adminID,
+    });
+
+    if (!receita) {
+      return res.status(404).json({ message: 'Despesa não encontrada.' });
+    }
+
+    return res.status(200).json({ message: 'Despesa deletada com sucesso.' });
+  } catch (error) {
+    console.error('Erro ao deletar despesa:', error);
+    return res.status(500).json({ message: 'Erro interno do servidor.' });
+  }
+});
 
 module.exports = router;
