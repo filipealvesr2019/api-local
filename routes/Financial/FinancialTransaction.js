@@ -668,6 +668,55 @@ router.get("/receitas/mensais/:adminID", async (req, res) => {
 
 
 
+
+
+// Rota para obter despesas do dia filtradas por adminID e status 'RECEIVED'
+router.get("/despesas-do-dia/:adminID", async (req, res) => {
+  const { adminID } = req.params;
+
+  try {
+    const despesasDoDia = await FinancialTransaction.aggregate([
+      {
+        // Filtra por adminID, tipo 'despesa' e status 'RECEIVED'
+        $match: {
+          adminID: new mongoose.Types.ObjectId(adminID),
+          type: "despesa",
+        }
+      },
+      {
+        // Usa $expr e $dateToString para comparar apenas o dia, mês e ano da paymentDate
+        $match: {
+          $expr: {
+            $eq: [
+              { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+              { $dateToString: { format: "%Y-%m-%d", date: new Date() } }
+            ]
+          }
+        }
+      },
+      {
+        // Agrupa para somar as despesas do dia
+        $group: {
+          _id: null,
+          totalDespesas: { $sum: "$amount" }, // Soma o valor total das despesas
+          despesas: { $push: "$$ROOT" } // Opcional: lista as despesas do dia
+        }
+      }
+    ]);
+
+    // Se não houver despesas, retorna um valor total de 0
+    if (!despesasDoDia.length) {
+      return res.json({ totalDespesas: 0, despesas: [] });
+    }
+
+    res.json(despesasDoDia[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erro ao obter despesas do dia" });
+  }
+});
+
+
 // Rota para obter despesas do dia filtradas por adminID e status 'RECEIVED'
 router.get("/despesas/dia/:adminID", async (req, res) => {
   const { adminID } = req.params;
