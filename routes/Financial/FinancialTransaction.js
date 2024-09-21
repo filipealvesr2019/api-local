@@ -67,7 +67,7 @@ router.get("/receitas/:adminID", async (req, res) => {
 
 // Rota para criar uma nova receita
 router.post("/receitas", async (req, res) => {
-  const { paymentDate, description, amount, relatedCart, category, adminID } = req.body;
+  const { paymentDate, createdAt,  description, amount, relatedCart, category, adminID } = req.body;
 
   try {
       // Buscar o nome da categoria
@@ -79,6 +79,7 @@ router.post("/receitas", async (req, res) => {
       const newTransaction = new FinancialTransaction({
           adminID,
           paymentDate,
+          createdAt,
           type: "receita",
           description,
           amount,
