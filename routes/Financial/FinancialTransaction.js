@@ -1066,4 +1066,56 @@ router.get("/receitas-recebidas/mes/:adminID", async (req, res) => {
   }
 });
 
+
+
+
+router.get("/receitas-recebidas/mes-anterior/:adminID", async (req, res) => {
+  try {
+    const { adminID } = req.params;
+
+    // Verifica se adminID é um ObjectId válido
+    if (!mongoose.Types.ObjectId.isValid(adminID)) {
+      return res.status(400).json({ message: "ID de administrador inválido." });
+    }
+
+    // Obtém o mês anterior e ajusta o ano se necessário
+    const now = new Date();
+    const startOfLastMonth = new Date(Date.UTC(
+      now.getUTCMonth() === 0 ? now.getUTCFullYear() - 1 : now.getUTCFullYear(),
+      now.getUTCMonth() === 0 ? 11 : now.getUTCMonth() - 1, 
+      1
+    ));
+    const endOfLastMonth = new Date(Date.UTC(
+      now.getUTCMonth() === 0 ? now.getUTCFullYear() - 1 : now.getUTCFullYear(),
+      now.getUTCMonth() === 0 ? 11 : now.getUTCMonth(),
+      0, 23, 59, 59
+    ));
+
+    // Busca as receitas do adminID dentro do mês anterior
+    const receitas = await FinancialTransaction.find({
+      adminID: adminID,
+      type: "receita",
+      createdAt: {
+        $gte: startOfLastMonth,
+        $lte: endOfLastMonth
+      },
+      status: "RECEIVED" // Considerando que "RECEIVED" é o status de receita recebida
+    })
+    .sort({ createdAt: -1 }) // Ordena de forma decrescente pela data de criação
+    .populate("relatedCart category");
+
+    if (!receitas.length) {
+      return res.status(404).json({ message: "Nenhuma receita recebida no mês anterior." });
+    }
+
+    // Soma todas as receitas
+    const totalReceitas = receitas.reduce((acc, receita) => acc + receita.amount, 0);
+
+    res.json({ receitas, totalReceitas: totalReceitas.toFixed(2) });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erro ao buscar receitas." });
+  }
+});
+
 module.exports = router;
