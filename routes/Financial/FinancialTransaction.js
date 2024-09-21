@@ -1016,7 +1016,7 @@ router.get("/receitas-a-receber/mes/:adminID", async (req, res) => {
     // soma todas as receitas a receber
     const totalReceitas = receitas.reduce((acc, receita) => acc + receita.amount, 0)
 
-    res.json({receitas, totalReceitas: totalReceitas.toFixed(2)});
+    res.json({receitas, totalReceitas: totalReceitas});
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Erro ao buscar receitas." });
