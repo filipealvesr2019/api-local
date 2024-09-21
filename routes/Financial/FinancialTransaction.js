@@ -978,4 +978,90 @@ router.delete('/despesas/:adminID/:id', async (req, res) => {
 
 
 
+
+
+router.get("/receitas-a-receber/mes/:adminID", async (req, res) => {
+  try {
+    const { adminID } = req.params;
+
+    // Verifica se adminID é um ObjectId válido
+    if (!mongoose.Types.ObjectId.isValid(adminID)) {
+      return res.status(400).json({ message: "ID de administrador inválido." });
+    }
+
+    // Pega o mês e o ano atual (ou o mês e ano que você deseja buscar)
+    const now = new Date();
+    const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)); // Início do mês
+    const endOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59)); // Fim do mês
+
+    // Busca as receitas do adminID dentro do mês atual
+    const receitas = await FinancialTransaction.find({
+      adminID: adminID,
+      type: "receita",
+      createdAt: {
+        $gte: startOfMonth,
+        $lte: endOfMonth
+      },
+      status: "PENDING"
+    })
+    .sort({ createdAt: -1 }) // Ordena de forma decrescente
+    .populate("relatedCart category");
+
+    if (!receitas.length) {
+      return res.status(404).json({ message: "Nenhuma receita encontrada para este mês." });
+    }
+
+    // soma todas as receitas a receber
+    const totalReceitas = receitas.reduce((acc, receita) => acc + receita.amount, 0)
+
+    res.json({receitas, totalReceitas: totalReceitas.toFixed(2)});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erro ao buscar receitas." });
+  }
+});
+
+
+
+router.get("/receitas-recebidas/mes/:adminID", async (req, res) => {
+  try {
+    const { adminID } = req.params;
+
+    // Verifica se adminID é um ObjectId válido
+    if (!mongoose.Types.ObjectId.isValid(adminID)) {
+      return res.status(400).json({ message: "ID de administrador inválido." });
+    }
+
+    // Pega o mês e o ano atual (ou o mês e ano que você deseja buscar)
+    const now = new Date();
+    const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)); // Início do mês
+    const endOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59)); // Fim do mês
+
+    // Busca as receitas do adminID dentro do mês atual
+    const receitas = await FinancialTransaction.find({
+      adminID: adminID,
+      type: "receita",
+      createdAt: {
+        $gte: startOfMonth,
+        $lte: endOfMonth
+      },
+      status: "RECEIVED"
+    })
+    .sort({ createdAt: -1 }) // Ordena de forma decrescente
+    .populate("relatedCart category");
+
+    if (!receitas.length) {
+      return res.status(404).json({ message: "Nenhuma receita encontrada para este mês." });
+    }
+
+    // soma todas as receitas a receber
+    const totalReceitas = receitas.reduce((acc, receita) => acc + receita.amount, 0)
+
+    res.json({receitas, totalReceitas: totalReceitas.toFixed(2)});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erro ao buscar receitas." });
+  }
+});
+
 module.exports = router;
