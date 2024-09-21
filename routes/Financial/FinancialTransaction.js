@@ -1118,4 +1118,49 @@ router.get("/receitas-recebidas/mes-anterior/:adminID", async (req, res) => {
   }
 });
 
+
+router.get("/receitas-vencidas/mes-atual/:adminID", async (req, res) => {
+  try {
+    const { adminID } = req.params;
+
+    // Verifica se adminID é um ObjectId válido
+    if (!mongoose.Types.ObjectId.isValid(adminID)) {
+      return res.status(400).json({ message: "ID de administrador inválido." });
+    }
+
+    // Data atual
+    const now = new Date();
+    
+    // Início e fim do mês atual
+    const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)); // Início do mês atual
+    const endOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59)); // Fim do mês atual
+
+    // Busca receitas pendentes que deveriam ter sido recebidas até o momento, mas ainda não foram (vencidas)
+    const receitasVencidas = await FinancialTransaction.find({
+      adminID: adminID,
+      type: "receita",
+      status: "PENDING", // Receita ainda pendente
+      paymentDate: { $lt: now }, // Data de pagamento anterior à data atual (vencida)
+      createdAt: { 
+        $gte: startOfMonth, // Dentro do mês atual
+        $lte: endOfMonth
+      }
+    })
+    .sort({ paymentDate: -1 }) // Ordena pela data de pagamento, do mais recente ao mais antigo
+    .populate("relatedCart category");
+
+    if (!receitasVencidas.length) {
+      return res.status(404).json({ message: "Nenhuma receita vencida encontrada para este mês." });
+    }
+
+    // Soma o valor total das receitas vencidas
+    const totalReceitasVencidas = receitasVencidas.reduce((acc, receita) => acc + receita.amount, 0);
+
+    res.json({ receitasVencidas, totalReceitasVencidas: totalReceitasVencidas.toFixed(2) });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erro ao buscar receitas vencidas." });
+  }
+});
+
 module.exports = router;
