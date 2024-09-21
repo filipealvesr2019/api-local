@@ -1156,7 +1156,7 @@ router.get("/receitas-vencidas/mes-atual/:adminID", async (req, res) => {
     // Soma o valor total das receitas vencidas
     const totalReceitasVencidas = receitasVencidas.reduce((acc, receita) => acc + receita.amount, 0);
 
-    res.json({ receitasVencidas, totalReceitasVencidas: totalReceitasVencidas) });
+    res.json({ receitasVencidas, totalReceitasVencidas: totalReceitasVencidas });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Erro ao buscar receitas vencidas." });
