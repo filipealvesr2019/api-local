@@ -183,11 +183,22 @@ router.post("/admin/register/:token", async (req, res) => {
       role,
     });
 
+    const formatProductNameForURL = (subdomain) => {
+      return subdomain
+        .normalize("NFD") // Normaliza a string para decompor caracteres acentuados
+        .replace(/[\u0300-\u036f]/g, "") // Remove os diacríticos (acentos)
+        .toLowerCase() // Converte para letras minúsculas
+        .replace(/\s+/g, "-") // Substitui espaços por hífens
+        .replace(/[^\w\-]+/g, ""); // Remove caracteres não alfanuméricos (exceto hífens)
+    };
+    const formattedSubdomain = formatProductNameForURL(subdomain);
+
+    
     // Ajuste do modelo Ecommerce
     const ecommerce = new Ecommerce({
       adminID: user._id,
       layout: 'layout1', // Ajuste conforme necessário
-      dominio: subdomain,
+      dominio: formattedSubdomain,
       theme: {
         header: {
           Logo: 'https://i.imgur.com/bMWS6ec.png', // Ajuste conforme necessário

@@ -96,12 +96,8 @@ app.use(express.urlencoded({ extended: true }));
 // Acesso à variável de ambiente MONGODB_URI do arquivo .env
 const uri = process.env.MONGODB_URI;
 
-const options = {
-  serverSelectionTimeoutMS: 30000, // 30 segundos
-  socketTimeoutMS: 30000 // 30 segundos
-};
 // Conexão com o banco de dados
-mongoose.connect(uri, options).then(() => {
+mongoose.connect(uri).then(() => {
   console.log('Conectado ao banco de dados');
 }).catch((error) => {
   console.error('Erro de conexão com o banco de dados:', error);
