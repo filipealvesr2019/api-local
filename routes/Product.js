@@ -38,7 +38,7 @@ router.post('/products', async (req, res) => {
 
 
 // Rota para obter os detalhes de um produto pelo ID
-router.get('/product/:id', async (req, res) => {
+router.get('/product/:name/:id', async (req, res) => {
   try {
       const product = await Product.findById(req.params.id); // Busca o produto pelo ID
       if (!product) {
