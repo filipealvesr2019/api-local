@@ -24,6 +24,7 @@ const FinancialTransaction = require('./routes/Financial/FinancialTransaction');
 
 const Categories = require('./routes/categories/Categories');
 const MetaAPI = require('./routes/Meta API/whatsapp');
+const cronJobs = require('./routes/cronJobs');
 
 
 
@@ -76,6 +77,7 @@ app.use('/api', FinancialTransaction);
 app.use('/api', Categories);
 
 app.use('/api', MetaAPI);
+app.use('/api', cronJobs)
 
 
 
