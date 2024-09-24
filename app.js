@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express  = require ('express');
 const cors = require('cors'); // Importando o módulo cors
-
+const path = require('path');
 const bodyParser = require('body-parser');
 const port = process.env.PORT || 3002;
 const app = express();
@@ -79,6 +79,12 @@ app.use('/api', Categories);
 app.use('/api', MetaAPI);
 app.use('/api', cronJobs)
 
+
+// Definir o template engine como EJS
+app.set('view engine', 'ejs');
+
+// Definir o diretório onde os templates estão localizados
+app.set('views', path.join(__dirname, 'views'));
 
 
 

@@ -37,20 +37,47 @@ router.post('/products', async (req, res) => {
 });
 
 
-// Rota para obter os detalhes de um produto pelo ID
+
+
+
+
+
+
+
+// // Rota para obter os detalhes de um produto pelo ID
+// router.get('/product/:name/:id', async (req, res) => {
+//   try {
+//       const product = await Product.findById(req.params.id); // Busca o produto pelo ID
+//       if (!product) {
+//           return res.status(404).json({ error: 'Product not found' });
+//       }
+//       res.status(200).json(product); // Retorna os detalhes do produto em formato JSON
+//   } catch (error) {
+//       console.error('Error fetching product details:', error);
+//       res.status(500).json({ error: 'Failed to fetch product details.' });
+//   }
+// });
+
+// Rota para obter os detalhes de um produto pelo ID e renderizar a página
 router.get('/product/:name/:id', async (req, res) => {
   try {
       const product = await Product.findById(req.params.id); // Busca o produto pelo ID
       if (!product) {
-          return res.status(404).json({ error: 'Product not found' });
+          return res.status(404).send('Produto não encontrado');
       }
-      res.status(200).json(product); // Retorna os detalhes do produto em formato JSON
+
+      // Renderizar a página do produto com as meta tags dinâmicas
+      res.render('product', {
+        product, // Enviar o produto para o template
+        metaTitle: product.name,
+        metaDescription: product.description || 'Descrição do produto não disponível.',
+        metaImageUrl: product.imageUrl || '/default-image.jpg' // Adicionar a URL da imagem do produto
+      });
   } catch (error) {
-      console.error('Error fetching product details:', error);
-      res.status(500).json({ error: 'Failed to fetch product details.' });
+      console.error('Erro ao buscar detalhes do produto:', error);
+      res.status(500).send('Erro ao buscar detalhes do produto.');
   }
 });
-
 
 // Rota para buscar um produto específico pelo storeID e productID
 router.get('/produto/loja/:storeID/:productID', async (req, res) => {
@@ -108,5 +135,10 @@ router.get('/produtos/loja/:storeID', async (req, res) => {
     res.status(500).json({ message: 'Erro ao buscar os produtos', error });
   }
 });
+
+
+
+
+
 
 module.exports = router;
