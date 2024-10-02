@@ -170,7 +170,7 @@ const sendEmail = async (email, token) => {
   const client = new postmark.ServerClient(process.env.POSTMARK_API_KEY);
 
   try {
-    const registrationLink = `http://localhost:5002/user/register/${token}`;
+    const registrationLink = `http://localhost:5002/register-user-token/${token}`;
 
     await client.sendEmail({
       From: "ceo@mediewal.com.br",
@@ -248,11 +248,12 @@ router.post("/user/register/request", async (req, res) => {
 });
 
 // Rota para solicitar registro
-router.post("/user/register/:token", async (req, res) => {
+router.post("/register-user-token/:token", async (req, res) => {
   const { token } = req.params;
   const { email, password, role } = req.body;
 
   try {
+
     // Verificar se o token é válido
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
 
