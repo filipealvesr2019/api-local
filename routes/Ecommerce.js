@@ -422,4 +422,15 @@ router.get('/loja/admin/:adminID', async (req, res) => {
     res.status(500).json({ message: 'Erro ao buscar a loja', error });
   }
 });
+
+// Rota para obter todas as lojas com o campo dominio
+router.get('/lojas', async (req, res) => {
+  try {
+    const lojas = await Ecommerce.find({}, 'dominio'); // Obtém apenas o campo dominio
+    res.status(200).json(lojas); // Retorna as lojas como JSON
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao buscar lojas' });
+  }
+});
 module.exports = router;
