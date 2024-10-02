@@ -1,19 +1,13 @@
-const router = require('express').Router();
-const passport = require('passport');
+const router = require("express").Router();
+const passport = require("passport");
 const postmark = require("postmark");
 
 const bcrypt = require("bcryptjs"); // Para gerar senhas temporárias
 const jwt = require("jsonwebtoken");
-const {
-  loginUser,
-  registerUser,
- 
+const { loginUser, registerUser } = require("../controllers/User");
 
-} = require("../controllers/User");
-
-const User = require('../models/User');
-const UserForm = require('../models/UserForm');
-
+const User = require("../models/User");
+const UserForm = require("../models/UserForm");
 
 router.post("/signupUser", async (req, res) => {
   try {
@@ -21,7 +15,7 @@ router.post("/signupUser", async (req, res) => {
       storeID,
       userID,
       name,
- 
+
       mobilePhone,
       email,
       postalCode,
@@ -31,7 +25,6 @@ router.post("/signupUser", async (req, res) => {
       province,
       city,
       state,
-   
     } = req.body;
 
     const existingUser = await UserForm.findOne({ email });
@@ -55,18 +48,15 @@ router.post("/signupUser", async (req, res) => {
       province,
       city,
       state,
-   
+
       isRegistered: true, // Definir como true quando o usuário for criado
     });
 
     const savedUser = await newUser.save();
 
-    
-
     res.status(201).json({
       user: savedUser,
       message: "Usuário criado com sucesso.",
-
     });
   } catch (error) {
     console.error("Erro ao criar usuário:", error);
@@ -76,68 +66,59 @@ router.post("/signupUser", async (req, res) => {
   }
 });
 
-
-
-
-
-
-
-
-
-
-
-
 // Middleware para verificar o token
 // Autenticação Local
-router.post('/signin', passport.authenticate('local'), (req, res) => {
-    res.json({ message: 'Logged in', user: req.user,    token: req.authInfo.token });
-  });
-  
+router.post("/signin", passport.authenticate("local"), (req, res) => {
+  res.json({ message: "Logged in", user: req.user, token: req.authInfo.token });
+});
 
 // Rota para iniciar a autenticação com Google
-router.get('/google', passport.authenticate('google', {
-    scope: ['profile', 'email'] // Certifique-se de que isso está presente e configurado corretamente
-  }));
-  
-  // Rota de callback para receber o token do Google
-  router.get('/google/callback',
-    passport.authenticate('google', { failureRedirect: '/' }),
-    (req, res) => {
-      // O token gerado estará disponível no req.authInfo
-      res.json({
-        message: 'Login successful',
-        token: req.authInfo.token // Envie o token na resposta
-      });
-    }
-  );
-  
+router.get(
+  "/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"], // Certifique-se de que isso está presente e configurado corretamente
+  })
+);
 
-  const ensureAuthenticatedJWT = async (req, res, next) => {
-    const token = req.headers.authorization?.split(' ')[1]; // Extrai o token do cabeçalho Authorization
-  
-    if (!token) {
-      return res.status(401).json({ message: 'Token não fornecido.' });
+// Rota de callback para receber o token do Google
+router.get(
+  "/google/callback",
+  passport.authenticate("google", { failureRedirect: "/" }),
+  (req, res) => {
+    // O token gerado estará disponível no req.authInfo
+    res.json({
+      message: "Login successful",
+      token: req.authInfo.token, // Envie o token na resposta
+    });
+  }
+);
+
+const ensureAuthenticatedJWT = async (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1]; // Extrai o token do cabeçalho Authorization
+
+  if (!token) {
+    return res.status(401).json({ message: "Token não fornecido." });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Decodifica o token
+    const user = await User.findById(decoded.id); // Busca o usuário no banco de dados
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuário não encontrado." });
     }
-  
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET); // Decodifica o token
-      const user = await User.findById(decoded.id); // Busca o usuário no banco de dados
-  
-      if (!user) {
-        return res.status(404).json({ message: 'Usuário não encontrado.' });
-      }
-  
-      req.user = user; // Adiciona o usuário autenticado ao req
-      next();
-    } catch (err) {
-      return res.status(401).json({ message: 'Token inválido.' });
-    }
-  };
-  
-  router.get('/rota-protegida', ensureAuthenticatedJWT, (req, res) => {
-    res.json({ message: 'Você está autenticado com JWT!' });
-  });
-  
+
+    req.user = user; // Adiciona o usuário autenticado ao req
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: "Token inválido." });
+  }
+};
+
+router.get("/rota-protegida", ensureAuthenticatedJWT, (req, res) => {
+  res.json({ message: "Você está autenticado com JWT!" });
+});
+
 //  // Rota de perfil
 // router.get('/profile', (req, res) => {
 //     if (req.isAuthenticated()) {
@@ -149,21 +130,20 @@ router.get('/google', passport.authenticate('google', {
 //   });
 
 // Autenticação Facebook
-router.get('/facebook', passport.authenticate('facebook', { scope: ['email'] }));
+router.get(
+  "/facebook",
+  passport.authenticate("facebook", { scope: ["email"] })
+);
 
-router.get('/facebook/callback', passport.authenticate('facebook'), (req, res) => {
-  res.redirect('/dashboard'); // Redirecionar para o dashboard ou para onde preferir
-});
-
-
-
-
-
-
-
+router.get(
+  "/facebook/callback",
+  passport.authenticate("facebook"),
+  (req, res) => {
+    res.redirect("/dashboard"); // Redirecionar para o dashboard ou para onde preferir
+  }
+);
 
 router.post("/loginUser", loginUser); // Use directly from AuthController
-
 
 // Função para enviar e-mail usando Postmark
 const sendEmail = async (email, token) => {
@@ -224,26 +204,30 @@ const sendEmail = async (email, token) => {
   }
 };
 
-
-
-
-
-
 // Rota para solicitar registro
 router.post("/user/register/request", async (req, res) => {
   const { email } = req.body;
 
   try {
     // Gerar token JWT com duração de 10 minutos
-    const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "10m" });
+    const token = jwt.sign({ email }, process.env.JWT_SECRET, {
+      expiresIn: "10m",
+    });
 
     // Enviar e-mail com o link de registro contendo o token
     await sendEmail(email, token);
 
-    res.status(200).json({ success: true, message: "Link de registro enviado com sucesso." });
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: "Link de registro enviado com sucesso.",
+      });
   } catch (error) {
     console.error("Erro ao solicitar registro", error);
-    res.status(500).json({ success: false, error: "Erro interno do servidor." });
+    res
+      .status(500)
+      .json({ success: false, error: "Erro interno do servidor." });
   }
 });
 
@@ -253,13 +237,14 @@ router.post("/register-user-token/:token", async (req, res) => {
   const { email, password, role } = req.body;
 
   try {
-
     // Verificar se o token é válido
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
 
     // Verificar se o e-mail no token corresponde ao fornecido no corpo da solicitação
     if (decodedToken.email !== email) {
-      return res.status(400).json({ success: false, error: "Token inválido para este e-mail." });
+      return res
+        .status(400)
+        .json({ success: false, error: "Token inválido para este e-mail." });
     }
 
     // Verificação da composição da senha
@@ -267,7 +252,8 @@ router.post("/register-user-token/:token", async (req, res) => {
     if (!passwordRegex.test(password)) {
       return res.status(400).json({
         success: false,
-        error: "A senha deve conter pelo menos uma letra maiúscula, uma letra minúscula, um número e um caractere especial.",
+        error:
+          "A senha deve conter pelo menos uma letra maiúscula, uma letra minúscula, um número e um caractere especial.",
       });
     }
 
@@ -278,7 +264,6 @@ router.post("/register-user-token/:token", async (req, res) => {
       role,
     });
 
-   
     res.status(201).json({
       user,
       success: true,
@@ -286,7 +271,9 @@ router.post("/register-user-token/:token", async (req, res) => {
     });
   } catch (error) {
     console.error("Erro ao registrar usuário", error);
-    res.status(500).json({ success: false, error: "Erro interno do servidor." });
+    res
+      .status(500)
+      .json({ success: false, error: "Erro interno do servidor." });
   }
 });
 
@@ -323,13 +310,11 @@ router.post("/user/register/:token", async (req, res) => {
       role,
     });
 
-    res
-      .status(201)
-      .json({
-        user,
-        success: true,
-        message: "Usuário registrado com sucesso.",
-      });
+    res.status(201).json({
+      user,
+      success: true,
+      message: "Usuário registrado com sucesso.",
+    });
   } catch (error) {
     console.error("Erro ao registrar usuário", error);
     res
@@ -432,12 +417,10 @@ const resetPassword = async (req, res) => {
       decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "O token expirou. Solicite um novo link de redefinição de senha.",
-          });
+        return res.status(400).json({
+          message:
+            "O token expirou. Solicite um novo link de redefinição de senha.",
+        });
       }
       console.error("Erro ao verificar token:", error);
       return res.status(400).json({ message: "Token inválido." });
@@ -446,8 +429,7 @@ const resetPassword = async (req, res) => {
     const userId = decodedToken.userId;
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    await Admin.updateOne({ _id: userId }, { password: hashedPassword });
-
+    await User.updateOne({ _id: userId }, { password: hashedPassword });
 
     res.status(200).json({ message: "Senha redefinida com sucesso." });
   } catch (error) {
@@ -458,19 +440,10 @@ const resetPassword = async (req, res) => {
   }
 };
 
-router.post("/forgot-password", sendPasswordResetEmail);
+router.post("/user/forgot-password", sendPasswordResetEmail);
 // Rota para redefinir a senha
-router.post("/reset-password/:token", resetPassword);
-
+router.post("/user-reset-password/:token", resetPassword);
 
 router.post("/User", registerUser); // Use directly from AuthController
-
-
-
-
-
-
-
-
 
 module.exports = router;
