@@ -14,7 +14,10 @@ const productSchema = new mongoose.Schema({
   },
   storeID:  {type: String, required: true },
   name: { type: String, required: true },
-  category: { type: String, required: true },
+  category: { type: mongoose.Schema.Types.ObjectId, ref: "Category" }, // Referência à categoria
+  categoryName: { 
+    type: String 
+  },
   imageUrl: { type: String, required: true },
   price: { type: Number, required: true },
   variations: [variationSchema], // Array de variações

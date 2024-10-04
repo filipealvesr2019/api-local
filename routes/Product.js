@@ -6,7 +6,7 @@ const { default: mongoose } = require('mongoose');
 // Rota para cadastrar um produto
 router.post('/products', async (req, res) => {
   try {
-    const { adminID, storeID,  name, category, price, imageUrl,  variations } = req.body;
+    const { adminID, storeID,  name, category, price, imageUrl,  variations, categoryName } = req.body;
 
     // Validação simples (pode ser expandida conforme necessário)
     if (!name || !category) {
@@ -19,6 +19,7 @@ router.post('/products', async (req, res) => {
       storeID,
       name,
       category,
+      categoryName,
       price,
       imageUrl,
       variations, // A variação deve seguir o formato definido no schema
