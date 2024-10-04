@@ -12,6 +12,12 @@ const cartSchema = new mongoose.Schema({
     ref: "UserForm",
     required: true,
   },
+
+  storeID:  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "UserForm",
+    required: true,
+  },
   productId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Product",
