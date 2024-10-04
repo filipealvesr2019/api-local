@@ -11,7 +11,7 @@ const { ObjectId } = require('mongoose').Types;
 router.post("/cart/:userID/:productId", async (req, res) => {
   try {
     const { userID, productId } = req.params;
-    const { variations, quantity, paymentMethod  } = req.body; // Array de variações
+    const { quantity,   } = req.body; // Array de variações
 
     // Verifique se o customerId e o productId são válidos
     if (!ObjectId.isValid(userID) || !ObjectId.isValid(productId)) {
@@ -36,33 +36,19 @@ router.post("/cart/:userID/:productId", async (req, res) => {
     }
 
 
-    // Verificar se o método de pagamento é válido
-    const validPaymentMethods = ["Pix", "Cartão de Credito", "Dinheiro"];
-    if (!validPaymentMethods.includes(paymentMethod)) {
-      return res.status(400).json({ error: "Invalid payment method" });
-    }
-    let variationTotal = 0;
-    if(variations && Array.isArray(variations)){
-      variationTotal = variations.reduce((sum, variation) => {
-        return sum + (variation. price || 0)
-      }, 0)
-    }
-    let total = product.price * quantity;
-    let totalAmount = total + variationTotal
     // Criar novo pedido com as variações fornecidas
     const newOrder = new Cart({
-      storeID: User.storeID,
+      productId: productId, // Adicione productId
       userID: User.userID,
       name: product.name,
       category: product.category,
       price: product.price,
       imageUrl: product.imageUrl,
       quantity: quantity,
-      totalAmount: totalAmount,
+
       status: 'PENDING', // Campo para o status da compra
       purchaseDate: new Date(), // Preenche com a data e hora atuais
-      variations: variations, // Array de variações
-      paymentMethod 
+     
 
 
     });
@@ -78,7 +64,32 @@ router.post("/cart/:userID/:productId", async (req, res) => {
 });
 
 
+// Excluir item do carrinho
+router.delete("/cart/:userID/:productId", async (req, res) => {
+  const { userID, productId } = req.params;
 
+  try {
+    // Verifique se o userID e o productId são válidos
+    if (!ObjectId.isValid(userID) || !ObjectId.isValid(productId)) {
+      return res.status(400).json({ error: "Invalid user ID or product ID" });
+    }
+
+    // Buscar o item no carrinho
+    const cartItem = await Cart.findOne({ userID, productId });
+
+    if (!cartItem) {
+      return res.status(404).json({ error: "Item not found in cart" });
+    }
+
+    // Remover o item do carrinho
+    await Cart.deleteOne({ userID, productId });
+
+    res.status(200).json({ message: "Item removed from cart successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "An error occurred while removing the item from the cart" });
+  }
+});
 // Rota para obter os detalhes de um produto pelo ID
 router.get('/sale/:id', async (req, res) => {
   try {
@@ -458,4 +469,14 @@ router.get("/totalOrders/:userID", async (req, res) => {
     res.status(500).json({ message: "Erro ao buscar total de pedidos." });
   }
 });
+
+
+
+
+
+
+
+
+
+
 module.exports = router;

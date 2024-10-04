@@ -12,9 +12,9 @@ const cartSchema = new mongoose.Schema({
     ref: "UserForm",
     required: true,
   },
-  storeID: {
+  productId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "UserForm",
+    ref: "Product",
     required: true,
   },
   name: {
@@ -32,16 +32,15 @@ const cartSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  totalAmount: { type: Number, required: true },
   quantity: { type: Number, required: true },
   status: { type: String, required: true }, // Campo para o status da compra
   purchaseDate: { type: Date, required: true }, // Data da compra
   variations: [variationSchema], // Array de variações
-   paymentMethod: {
-    type: String,
-    required: true,
-    enum: ["Pix", "Cartão de Credito", "Dinheiro"], // Opções de pagamento permitidas
-  }
+  //  paymentMethod: {
+  //   type: String,
+  //   required: true,
+  //   enum: ["Pix", "Cartão de Credito", "Dinheiro"], // Opções de pagamento permitidas
+  // }
 });
 
 // Correctly define the Cart model
