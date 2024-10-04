@@ -35,7 +35,7 @@ router.post("/cart/:userID/:productId", async (req, res) => {
       return res.status(400).json({error: 'Invalid quantity'})
     }
 
-console.log(User.storeID)
+
     // Criar novo pedido com as variações fornecidas
     const newOrder = new Cart({
       productId: productId, // Adicione productId
