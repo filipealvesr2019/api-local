@@ -22,9 +22,8 @@ const cartSchema = new mongoose.Schema({
     required: true,
   },
   category: {
-    type: String,
-    required: true,
-  },
+    type: String
+    },
   imageUrl: {
     type: String,
     required: true,
@@ -38,6 +37,11 @@ const cartSchema = new mongoose.Schema({
   status: { type: String, required: true }, // Campo para o status da compra
   purchaseDate: { type: Date, required: true }, // Data da compra
   variations: [variationSchema], // Array de variações
+   paymentMethod: {
+    type: String,
+    required: true,
+    enum: ["Pix", "Cartão de Credito", "Dinheiro"], // Opções de pagamento permitidas
+  }
 });
 
 // Correctly define the Cart model

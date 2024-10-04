@@ -11,7 +11,7 @@ const { ObjectId } = require('mongoose').Types;
 router.post("/cart/:userID/:productId", async (req, res) => {
   try {
     const { userID, productId } = req.params;
-    const { variations, quantity } = req.body; // Array de variações
+    const { variations, quantity, paymentMethod  } = req.body; // Array de variações
 
     // Verifique se o customerId e o productId são válidos
     if (!ObjectId.isValid(userID) || !ObjectId.isValid(productId)) {
@@ -34,6 +34,13 @@ router.post("/cart/:userID/:productId", async (req, res) => {
     if(isNaN(quantity) || quantity <= 0){
       return res.status(400).json({error: 'Invalid quantity'})
     }
+
+
+    // Verificar se o método de pagamento é válido
+    const validPaymentMethods = ["Pix", "Cartão de Credito", "Dinheiro"];
+    if (!validPaymentMethods.includes(paymentMethod)) {
+      return res.status(400).json({ error: "Invalid payment method" });
+    }
     let variationTotal = 0;
     if(variations && Array.isArray(variations)){
       variationTotal = variations.reduce((sum, variation) => {
@@ -55,6 +62,8 @@ router.post("/cart/:userID/:productId", async (req, res) => {
       status: 'PENDING', // Campo para o status da compra
       purchaseDate: new Date(), // Preenche com a data e hora atuais
       variations: variations, // Array de variações
+      paymentMethod 
+
 
     });
 

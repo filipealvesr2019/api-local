@@ -71,28 +71,4 @@ router.delete('/categorias/:adminID/:id', async (req, res) => {
 });
 
 
-
-
-
-// Rota para listar categorias por adminID
-router.get("/categories/:adminID", async (req, res) => {
-  const { adminID } = req.params;
-
-  try {
-    // Busca categorias pelo adminID
-    const categories = await Category.find({ adminID, type: 'loja' });
-
-    // Verifica se há categorias
-    if (!categories.length) {
-      return res.status(404).json({ message: "Nenhuma categoria encontrada para este adminID" });
-    }
-
-    // Retorna as categorias encontradas
-    res.status(200).json(categories);
-  } catch (error) {
-    // Lida com erros e responde com status 500
-    res.status(500).json({ message: "Erro ao buscar categorias", error });
-  }
-});
-
 module.exports = router;
