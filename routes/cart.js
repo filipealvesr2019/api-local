@@ -420,6 +420,42 @@ router.put("/compras/:cartId/status", async (req, res) => {
 
 
 
+// Rota para obter todos os produtos no carrinho por userID
+router.get("/cartProducts/:userID", async (req, res) => {
+  const { userID } = req.params;
+
+  try {
+    const cartItems = await Cart.find({ userID })
+      .populate("variations")
+      .populate("storeID") // Para popular os dados da loja, se necessário
+      .exec();
+
+    if (cartItems.length === 0) {
+      return res.status(404).json({ message: "Carrinho vazio." });
+    }
+
+    res.json(cartItems);
+  } catch (error) {
+    console.error("Error fetching cart items:", error);
+    res.status(500).json({ message: "Erro ao buscar itens no carrinho." });
+  }
+});
 
 
+// Rota para obter o total de pedidos do carrinho por userID
+router.get("/totalOrders/:userID", async (req, res) => {
+  const { userID } = req.params;
+
+  try {
+    const cartItems = await Cart.find({ userID });
+
+    // Somar o totalAmount de todos os pedidos
+    const totalOrders = cartItems.reduce((acc, item) => acc + item.totalAmount, 0);
+
+    res.json({ totalOrders });
+  } catch (error) {
+    console.error("Error fetching total orders:", error);
+    res.status(500).json({ message: "Erro ao buscar total de pedidos." });
+  }
+});
 module.exports = router;
