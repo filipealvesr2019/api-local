@@ -11,7 +11,7 @@ const { ObjectId } = require('mongoose').Types;
 router.post("/cart/:userID/:productId", async (req, res) => {
   try {
     const { userID, productId } = req.params;
-    const { quantity,   } = req.body; // Array de variações
+    const { quantity,variations   } = req.body; // Array de variações
 
     // Verifique se o customerId e o productId são válidos
     if (!ObjectId.isValid(userID) || !ObjectId.isValid(productId)) {
@@ -46,7 +46,7 @@ router.post("/cart/:userID/:productId", async (req, res) => {
       price: product.price,
       imageUrl: product.imageUrl,
       quantity: quantity,
-
+      variations,
       status: 'PENDING', // Campo para o status da compra
       createAt: new Date(), // Preenche com a data e hora atuais
      
