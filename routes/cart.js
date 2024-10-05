@@ -453,7 +453,6 @@ router.get("/cartProducts/:userID", async (req, res) => {
   }
 });
 
-
 // Rota para obter o total de pedidos do carrinho por userID
 router.get("/totalOrders/:userID", async (req, res) => {
   const { userID } = req.params;
@@ -462,8 +461,23 @@ router.get("/totalOrders/:userID", async (req, res) => {
     // Busca os itens do carrinho pelo userID
     const cartItems = await Cart.find({ userID });
 
-    // Calcula o total multiplicando o preço pela quantidade de cada item
-    const totalOrders = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    // Calcula o total considerando o preço do produto, quantidade e variações
+    const totalOrders = cartItems.reduce((acc, item) => {
+      // Somar o preço base do produto
+      let itemTotal = item.price;
+
+      // Adicionar o preço das variações (se houver)
+      if (item.variations && item.variations.length > 0) {
+        const variationsTotal = item.variations.reduce((variationAcc, variation) => variationAcc + variation.price, 0);
+        itemTotal += variationsTotal;
+      }
+
+      // Multiplicar pelo número de itens (quantidade)
+      itemTotal *= item.quantity;
+
+      // Adicionar ao total acumulado
+      return acc + itemTotal;
+    }, 0);
 
     res.json({ totalOrders });
   } catch (error) {
@@ -471,7 +485,6 @@ router.get("/totalOrders/:userID", async (req, res) => {
     res.status(500).json({ message: "Erro ao buscar total de pedidos." });
   }
 });
-
 
 
 
