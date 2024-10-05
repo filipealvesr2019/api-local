@@ -48,7 +48,7 @@ router.post("/cart/:userID/:productId", async (req, res) => {
       quantity: quantity,
 
       status: 'PENDING', // Campo para o status da compra
-      purchaseDate: new Date(), // Preenche com a data e hora atuais
+      createAt: new Date(), // Preenche com a data e hora atuais
      
 
 
@@ -459,10 +459,11 @@ router.get("/totalOrders/:userID", async (req, res) => {
   const { userID } = req.params;
 
   try {
+    // Busca os itens do carrinho pelo userID
     const cartItems = await Cart.find({ userID });
 
-    // Somar o totalAmount de todos os pedidos
-    const totalOrders = cartItems.reduce((acc, item) => acc + item.totalAmount, 0);
+    // Calcula o total multiplicando o preço pela quantidade de cada item
+    const totalOrders = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
     res.json({ totalOrders });
   } catch (error) {
