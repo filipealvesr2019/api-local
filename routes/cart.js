@@ -463,21 +463,21 @@ router.get("/totalOrders/:userID", async (req, res) => {
 
     // Calcula o total considerando o preço do produto, quantidade e variações
     const totalOrders = cartItems.reduce((acc, item) => {
-      // Somar o preço base do produto
-      let itemTotal = item.price;
-
-      // Adicionar o preço das variações (se houver)
+      // Preço total inicial (apenas o preço base multiplicado pela quantidade)
+      let itemTotal = item.price * item.quantity;
+    
+      // Se houver variações, somamos o total das variações ao preço base (uma vez)
       if (item.variations && item.variations.length > 0) {
         const variationsTotal = item.variations.reduce((variationAcc, variation) => variationAcc + variation.price, 0);
+        
+        // Adicionar o preço total das variações uma única vez, não multiplicado pela quantidade
         itemTotal += variationsTotal;
       }
-
-      // Multiplicar pelo número de itens (quantidade)
-      itemTotal *= item.quantity;
-
+    
       // Adicionar ao total acumulado
       return acc + itemTotal;
     }, 0);
+    
 
     res.json({ totalOrders });
   } catch (error) {
