@@ -79,7 +79,7 @@ app.use('/api', Categories);
 
 app.use('/api', MetaAPI);
 app.use('/api', cronJobs)
-app.use("/api/orders", ordersRouter); // Adicione esta linha
+app.use("/api", ordersRouter); // Adicione esta linha
 
 
 // Definir o template engine como EJS

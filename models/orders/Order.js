@@ -1,4 +1,3 @@
-// models/Order.js
 const mongoose = require("mongoose");
 
 const variationSchema = new mongoose.Schema({
@@ -7,15 +6,10 @@ const variationSchema = new mongoose.Schema({
   name: String,
 });
 
-const orderSchema = new mongoose.Schema({
-  userID: {
+const itemSchema = new mongoose.Schema({
+  productID: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "UserForm", // Certifique-se de que o modelo UserForm está corretamente configurado
-    required: true,
-  },
-  storeID: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "UserForm", // Ajuste conforme necessário
+    ref: "Product", // Certifique-se de que o modelo Product está configurado
     required: true,
   },
   name: {
@@ -33,28 +27,43 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  totalAmount: { 
-    type: Number, 
-    required: true 
-  },
-  quantity: { 
-    type: Number, 
-    required: true 
-  },
-  status: { 
-    type: String, 
-    required: true, 
-    enum: ["RECEIVED", "PENDING"], // Status do pedido
-  },
-  purchaseDate: { 
-    type: Date, 
-    required: true 
+ 
+  quantity: {
+    type: Number,
+    required: true,
   },
   variations: [variationSchema], // Array de variações
+});
+
+const orderSchema = new mongoose.Schema({
+  userID: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "UserForm",
+    required: true,
+  },
+  storeID: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "UserForm",
+    required: true,
+  },
+  items: [itemSchema], // Alterado para aceitar um array de itens
+  status: {
+    type: String,
+    required: true,
+    enum: ["RECEIVED", "PENDING"],
+  },
+  purchaseDate: {
+    type: Date,
+    required: true,
+  },
   paymentMethod: {
     type: String,
     required: true,
-    enum: ["Pix", "Cartão de Crédito", "Dinheiro"], // Opções de pagamento permitidas
+    enum: ["Pix", "Cartão de Crédito", "Dinheiro"],
+  },
+  totalAmount: {
+    type: Number,
+    required: true,
   },
 });
 
