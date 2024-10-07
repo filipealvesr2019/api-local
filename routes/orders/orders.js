@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const Order = require("../../models/orders/Order"); // Ajuste o caminho conforme necessário
 const Cart = require("../../models/cart/cart");
+const { default: mongoose } = require("mongoose");
+const FinancialTransaction = require("../../models/Financial/FinancialTransaction");
 
 router.post("/order", async (req, res) => {
   try {
@@ -115,6 +117,63 @@ router.get("/admin/order/:id", async (req, res) => {
   }
 });
 
+// Rota para atualizar o status da compra para "RECEIVED" ou "PENDING"
+router.put("/compras/:cartId/status", async (req, res) => {
+  const { cartId } = req.params; // ID da compra passada como parâmetro na URL
+  const { status, adminID  } = req.body; // Status enviado no corpo da requisição
+
+    // Verifica se o adminID é válido
+    if (!mongoose.Types.ObjectId.isValid(adminID)) {
+      return res.status(400).json({ message: "ID de administrador inválido." });
+    }
+
+  // Verifica se o status enviado é válido
+  const validStatuses = ["RECEIVED", "PENDING"];
+  if (!validStatuses.includes(status)) {
+    return res.status(400).json({ message: "Status inválido. Use 'RECEIVED' ou 'PENDING'." });
+  }
+
+  try {
+    // Buscar a compra (carrinho) existente
+    const cart = await Order.findById(cartId);
+
+    // Se a compra não for encontrada, retorne um erro
+    if (!cart) {
+      return res.status(404).json({ message: "Compra não encontrada" });
+    }
+
+    // Se o status anterior era "RECEIVED" e o novo status não for "RECEIVED", apagar a receita associada
+    if (cart.status === "RECEIVED" && status !== "RECEIVED") {
+      await FinancialTransaction.findOneAndDelete({ relatedCart: cart._id, type: "receita" });
+    }
+
+    // Atualizar o status da compra
+    cart.status = status;
+    await cart.save();
+
+    // Se o novo status for "RECEIVED", criar uma nova entrada de receita
+    if (status === "RECEIVED") {
+      const newTransaction = new FinancialTransaction({
+        adminID,
+        type: "receita",
+        description: `Receita de venda: ${cart.name}`,
+        amount: cart.totalAmount,
+        status: "RECEIVED",
+        relatedCart: cart._id,
+        createdAt: new Date(),
+        categoryName: cart.category
+      });
+
+      await newTransaction.save();
+    }
+
+    // Retorna o carrinho atualizado como resposta
+    res.status(200).json({ message: `Status atualizado para '${status}'`, cart });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erro ao atualizar status da compra", error });
+  }
+});
 
 
 module.exports = router;
