@@ -7,23 +7,22 @@ const FinancialTransaction = require("../../models/Financial/FinancialTransactio
 
 router.post("/order", async (req, res) => {
   try {
-    const {
-      userID,
-      storeID,
-      paymentMethod,
-    } = req.body;
+    const { userID, storeID, paymentMethod } = req.body;
 
     // Encontre os itens do carrinho para o usuário
     const cartItems = await Cart.find({ userID });
 
     // Mapeia os itens do carrinho para o formato esperado para o pedido
-    const items = cartItems.map(item => {
+    const items = cartItems.map((item) => {
       // Preço total do item considerando a quantidade
       let itemTotal = item.price * item.quantity;
 
       // Se houver variações, soma o total das variações ao preço base (uma vez)
       if (item.variations && item.variations.length > 0) {
-        const variationsTotal = item.variations.reduce((variationAcc, variation) => variationAcc + variation.price, 0);
+        const variationsTotal = item.variations.reduce(
+          (variationAcc, variation) => variationAcc + variation.price,
+          0
+        );
         itemTotal += variationsTotal; // Adiciona o preço total das variações
       }
 
@@ -32,7 +31,7 @@ router.post("/order", async (req, res) => {
         name: item.name,
         price: item.price,
         quantity: item.quantity,
-        imageUrl: item.imageUrl // Certifique-se de que imageUrl está sendo incluído
+        imageUrl: item.imageUrl, // Certifique-se de que imageUrl está sendo incluído
       };
     });
 
@@ -42,7 +41,10 @@ router.post("/order", async (req, res) => {
 
       // Se houver variações, soma o total das variações ao preço base (uma vez)
       if (item.variations && item.variations.length > 0) {
-        const variationsTotal = item.variations.reduce((variationAcc, variation) => variationAcc + variation.price, 0);
+        const variationsTotal = item.variations.reduce(
+          (variationAcc, variation) => variationAcc + variation.price,
+          0
+        );
         itemTotal += variationsTotal; // Adiciona o preço total das variações
       }
 
@@ -64,14 +66,16 @@ router.post("/order", async (req, res) => {
     await newOrder.save();
 
     // Retornar uma resposta bem-sucedida
-    return res.status(201).json({ message: "Pedido finalizado com sucesso!", order: newOrder });
+    return res
+      .status(201)
+      .json({ message: "Pedido finalizado com sucesso!", order: newOrder });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Erro ao finalizar o pedido.", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Erro ao finalizar o pedido.", error: error.message });
   }
 });
-
-
 
 // Rota para buscar todas as vendas de um carrinho por storeID
 router.get("/admin/vendas/:storeID", async (req, res) => {
@@ -79,11 +83,13 @@ router.get("/admin/vendas/:storeID", async (req, res) => {
     const { storeID } = req.params;
 
     // Buscar todas as vendas que correspondem ao storeID
-    const vendas = await Order.find({ storeID }).sort({ purchaseDate: -1 });;
+    const vendas = await Order.find({ storeID }).sort({ purchaseDate: -1 });
 
     // Se não houver vendas, retornar uma mensagem informativa
     if (vendas.length === 0) {
-      return res.status(404).json({ message: "Nenhuma venda encontrada para esta loja." });
+      return res
+        .status(404)
+        .json({ message: "Nenhuma venda encontrada para esta loja." });
     }
 
     // Retornar as vendas encontradas
@@ -120,17 +126,19 @@ router.get("/admin/order/:id", async (req, res) => {
 // Rota para atualizar o status da compra para "RECEIVED" ou "PENDING"
 router.put("/compras/:cartId/status", async (req, res) => {
   const { cartId } = req.params; // ID da compra passada como parâmetro na URL
-  const { status, adminID  } = req.body; // Status enviado no corpo da requisição
+  const { status, adminID } = req.body; // Status enviado no corpo da requisição
 
-    // Verifica se o adminID é válido
-    if (!mongoose.Types.ObjectId.isValid(adminID)) {
-      return res.status(400).json({ message: "ID de administrador inválido." });
-    }
+  // Verifica se o adminID é válido
+  if (!mongoose.Types.ObjectId.isValid(adminID)) {
+    return res.status(400).json({ message: "ID de administrador inválido." });
+  }
 
   // Verifica se o status enviado é válido
   const validStatuses = ["RECEIVED", "PENDING"];
   if (!validStatuses.includes(status)) {
-    return res.status(400).json({ message: "Status inválido. Use 'RECEIVED' ou 'PENDING'." });
+    return res
+      .status(400)
+      .json({ message: "Status inválido. Use 'RECEIVED' ou 'PENDING'." });
   }
 
   try {
@@ -144,7 +152,10 @@ router.put("/compras/:cartId/status", async (req, res) => {
 
     // Se o status anterior era "RECEIVED" e o novo status não for "RECEIVED", apagar a receita associada
     if (cart.status === "RECEIVED" && status !== "RECEIVED") {
-      await FinancialTransaction.findOneAndDelete({ relatedCart: cart._id, type: "receita" });
+      await FinancialTransaction.findOneAndDelete({
+        relatedCart: cart._id,
+        type: "receita",
+      });
     }
 
     // Atualizar o status da compra
@@ -161,19 +172,22 @@ router.put("/compras/:cartId/status", async (req, res) => {
         status: "RECEIVED",
         relatedCart: cart._id,
         createdAt: new Date(),
-        categoryName: cart.category
+        categoryName: cart.category,
       });
 
       await newTransaction.save();
     }
 
     // Retorna o carrinho atualizado como resposta
-    res.status(200).json({ message: `Status atualizado para '${status}'`, cart });
+    res
+      .status(200)
+      .json({ message: `Status atualizado para '${status}'`, cart });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Erro ao atualizar status da compra", error });
+    res
+      .status(500)
+      .json({ message: "Erro ao atualizar status da compra", error });
   }
 });
-
 
 module.exports = router;
