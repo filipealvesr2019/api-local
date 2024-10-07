@@ -406,6 +406,7 @@ router.post('/ecommerce/admin/qrcode', async (req, res) => {
 
 
 
+
 // Rota para buscar todos os detalhes da loja pelo adminID
 router.get('/loja/admin/:adminID', async (req, res) => {
   try {

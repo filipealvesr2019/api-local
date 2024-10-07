@@ -26,6 +26,7 @@ const Categories = require('./routes/categories/Categories');
 const MetaAPI = require('./routes/Meta API/whatsapp');
 const cronJobs = require('./routes/cronJobs');
 const ordersRouter = require("./routes/orders/orders"); // Ajuste o caminho conforme necessário
+const QRCodePIX = require("./routes/QRCodePIX/QRCodePIX"); // Ajuste o caminho conforme necessário
 
 
 
@@ -80,6 +81,7 @@ app.use('/api', Categories);
 app.use('/api', MetaAPI);
 app.use('/api', cronJobs)
 app.use("/api", ordersRouter); // Adicione esta linha
+app.use("/api", QRCodePIX); // Adicione esta linha
 
 
 // Definir o template engine como EJS
