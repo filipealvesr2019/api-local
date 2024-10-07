@@ -173,6 +173,7 @@ router.put("/compras/:cartId/status", async (req, res) => {
         relatedCart: cart._id,
         createdAt: new Date(),
         categoryName: cart.category,
+        paymentDate: new Date()
       });
 
       await newTransaction.save();
