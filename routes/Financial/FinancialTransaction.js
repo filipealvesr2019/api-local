@@ -124,7 +124,7 @@ router.get("/receitas/mes/:adminID", async (req, res) => {
       }
     })
     .sort({ createdAt: -1 }) // Ordena de forma decrescente
-    .populate("relatedCart category");
+    .populate("orderID category");
 
     if (!receitas.length) {
       return res.status(404).json({ message: "Nenhuma receita encontrada para este mês." });

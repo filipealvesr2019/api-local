@@ -124,8 +124,8 @@ router.get("/admin/order/:id", async (req, res) => {
 });
 
 // Rota para atualizar o status da compra para "RECEIVED" ou "PENDING"
-router.put("/compras/:cartId/status", async (req, res) => {
-  const { cartId } = req.params; // ID da compra passada como parâmetro na URL
+router.put("/compras/:orderId/status", async (req, res) => {
+  const { orderId } = req.params; // ID da compra passada como parâmetro na URL
   const { status, adminID } = req.body; // Status enviado no corpo da requisição
 
   // Verifica se o adminID é válido
@@ -143,46 +143,47 @@ router.put("/compras/:cartId/status", async (req, res) => {
 
   try {
     // Buscar a compra (carrinho) existente
-    const cart = await Order.findById(cartId);
+    const order = await Order.findById(orderId);
 
     // Se a compra não for encontrada, retorne um erro
-    if (!cart) {
+    if (!order) {
       return res.status(404).json({ message: "Compra não encontrada" });
     }
 
     // Se o status anterior era "RECEIVED" e o novo status não for "RECEIVED", apagar a receita associada
-    if (cart.status === "RECEIVED" && status !== "RECEIVED") {
+    if (order.status === "RECEIVED" && status !== "RECEIVED") {
       await FinancialTransaction.findOneAndDelete({
-        relatedCart: cart._id,
+        orderID: order._id,
         type: "receita",
       });
     }
 
     // Atualizar o status da compra
-    cart.status = status;
-    await cart.save();
+    order.status = status;
+    await order.save();
+    console.log(order._id)
 
     // Se o novo status for "RECEIVED", criar uma nova entrada de receita
     if (status === "RECEIVED") {
       const newTransaction = new FinancialTransaction({
         adminID,
         type: "receita",
-        description: `Receita de venda: ${cart.name}`,
-        amount: cart.totalAmount,
+        description: `Receita de venda`,
+        amount: order.totalAmount,
         status: "RECEIVED",
-        relatedCart: cart._id,
+        orderID: order._id,
         createdAt: new Date(),
-        categoryName: cart.category,
-        paymentDate: new Date()
+        categoryName: order.category,
+        paymentDate: new Date(),
+        
       });
-
       await newTransaction.save();
     }
 
     // Retorna o carrinho atualizado como resposta
     res
       .status(200)
-      .json({ message: `Status atualizado para '${status}'`, cart });
+      .json({ message: `Status atualizado para '${status}'`, order });
   } catch (error) {
     console.error(error);
     res
