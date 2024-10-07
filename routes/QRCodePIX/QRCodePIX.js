@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 
 const QRCode = require('qrcode');
 const PixQRCode = require('../../models/Pix/QRCodePIX');
+const Ecommerce = require('../../models/Ecommerce');
 const ObjectId = mongoose.Types.ObjectId; // Importando ObjectId
 
 
@@ -86,4 +87,31 @@ router.get("/admin/pix-keys/:adminID", async (req, res) => {
         res.status(500).json({ message: "Erro no servidor." });
     }
 });
+
+
+
+// Rota para atualizar o pixKey e qrCodeUrl no Ecommerce
+router.put("/ecommerce/update-pix/:adminID", async (req, res) => {
+    const { adminID } = req.params;
+    const { pixKey, qrCodeUrl } = req.body;
+  
+    try {
+      // Encontra o ecommerce pelo adminID e atualiza o pixKey e qrCodeUrl
+      const updatedEcommerce = await Ecommerce.findOneAndUpdate(
+        { adminID },
+        { pixKey, qrCodeUrl },
+        { new: true }
+      );
+  
+      if (!updatedEcommerce) {
+        return res.status(404).json({ message: "Ecommerce não encontrado." });
+      }
+  
+      res.status(200).json(updatedEcommerce);
+    } catch (error) {
+      console.error("Erro ao atualizar Ecommerce:", error);
+      res.status(500).json({ message: "Erro no servidor." });
+    }
+  });
+  
 module.exports = router;
