@@ -69,4 +69,52 @@ router.post("/order", async (req, res) => {
   }
 });
 
+
+
+// Rota para buscar todas as vendas de um carrinho por storeID
+router.get("/admin/vendas/:storeID", async (req, res) => {
+  try {
+    const { storeID } = req.params;
+
+    // Buscar todas as vendas que correspondem ao storeID
+    const vendas = await Order.find({ storeID }).sort({ purchaseDate: -1 });;
+
+    // Se não houver vendas, retornar uma mensagem informativa
+    if (vendas.length === 0) {
+      return res.status(404).json({ message: "Nenhuma venda encontrada para esta loja." });
+    }
+
+    // Retornar as vendas encontradas
+    res.status(200).json(vendas);
+  } catch (error) {
+    // Se houver um erro na consulta, retornar o erro
+    res.status(500).json({ message: "Erro ao buscar vendas", error });
+  }
+});
+
+// Rota para obter um pedido específico
+router.get("/admin/order/:id", async (req, res) => {
+  try {
+    const orderId = req.params.id;
+
+    // Encontre o pedido pelo ID
+    const order = await Order.findById(orderId)
+      .populate("userID") // Preencher dados do usuário, se necessário
+      .populate("storeID") // Preencher dados da loja, se necessário
+      .populate("items.productID"); // Preencher dados do produto
+
+    if (!order) {
+      return res.status(404).json({ message: "Pedido não encontrado." });
+    }
+
+    // Retornar o pedido encontrado
+    return res.json(order);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Erro ao buscar o pedido." });
+  }
+});
+
+
+
 module.exports = router;

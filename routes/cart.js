@@ -91,19 +91,6 @@ router.delete("/cart/:userID/:productId", async (req, res) => {
     res.status(500).json({ error: "An error occurred while removing the item from the cart" });
   }
 });
-// Rota para obter os detalhes de um produto pelo ID
-router.get('/sale/:id', async (req, res) => {
-  try {
-      const sales = await Cart.findById(req.params.id); // Busca o produto pelo ID
-      if (!sales) {
-          return res.status(404).json({ error: 'sale not found' });
-      }
-      res.status(200).json(sales); // Retorna os detalhes do produto em formato JSON
-  } catch (error) {
-      console.error('Error fetching sale details:', error);
-      res.status(500).json({ error: 'Failed to fetch sale details.' });
-  }
-});
 
 
 
@@ -116,28 +103,6 @@ router.get("/user/vendas/:storeID", async (req, res) => {
 
     // Buscar todas as vendas que correspondem ao storeID
     const vendas = await Cart.find({ storeID });
-
-    // Se não houver vendas, retornar uma mensagem informativa
-    if (vendas.length === 0) {
-      return res.status(404).json({ message: "Nenhuma venda encontrada para esta loja." });
-    }
-
-    // Retornar as vendas encontradas
-    res.status(200).json(vendas);
-  } catch (error) {
-    // Se houver um erro na consulta, retornar o erro
-    res.status(500).json({ message: "Erro ao buscar vendas", error });
-  }
-});
-
-
-// Rota para buscar todas as vendas de um carrinho por storeID
-router.get("/admin/vendas/:storeID", async (req, res) => {
-  try {
-    const { storeID } = req.params;
-
-    // Buscar todas as vendas que correspondem ao storeID
-    const vendas = await Cart.find({ storeID }).sort({ purchaseDate: -1 });;
 
     // Se não houver vendas, retornar uma mensagem informativa
     if (vendas.length === 0) {
