@@ -113,5 +113,26 @@ router.put("/ecommerce/update-pix/:adminID", async (req, res) => {
       res.status(500).json({ message: "Erro no servidor." });
     }
   });
+
+  
+// Rota para buscar pixKey e qrCodeUrl pelo adminID
+router.get('/pix/admin/:adminID', async (req, res) => {
+    try {
+      // Busca o documento Ecommerce pelo adminID
+      const ecommerce = await Ecommerce.findOne({ adminID: req.params.adminID }).select('pixKey qrCodeUrl');
+      
+      if (!ecommerce) {
+        return res.status(404).json({ message: 'E-commerce não encontrado' });
+      }
+  
+      // Retorna pixKey e qrCodeUrl
+      res.json({
+        pixKey: ecommerce.pixKey,
+        qrCodeUrl: ecommerce.qrCodeUrl,
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Erro ao buscar o e-commerce', error });
+    }
+  });
   
 module.exports = router;
