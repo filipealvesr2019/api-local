@@ -9,7 +9,7 @@ const financialTransactionSchema = new mongoose.Schema({
   type: { type: String, enum: ["receita", "despesa"], required: true },
   description: { type: String, required: true },
   amount: { type: Number, required: true },
-  orderID: { type: mongoose.Schema.Types.ObjectId, ref: "Order" },
+  orderID: { type: String, required: true },
   paymentDate: { type: Date }, // Data de pagamento/recebimento
   status: { type: String, enum: ["PENDING", "RECEIVED"], default: "PENDING" }, // Status da transação
   category: { type: mongoose.Schema.Types.ObjectId, ref: "Category" }, // Referência à categoria
