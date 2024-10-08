@@ -89,6 +89,22 @@ router.get("/admin/pix-keys/:adminID", async (req, res) => {
 });
 
 
+// Rota para excluir um QR Code específico pelo ID
+router.delete('/admin/pix-keys/:id', async (req, res) => {
+  try {
+    const { id } = req.params; // Obtém o ID da URL
+    const deletedQRCode = await PixQRCode.findByIdAndDelete(id); // Encontra e exclui o QR Code pelo ID
+
+    if (!deletedQRCode) {
+      return res.status(404).json({ message: 'QR Code não encontrado' });
+    }
+
+    res.status(200).json({ message: 'QR Code excluído com sucesso' });
+  } catch (error) {
+    console.error('Erro ao excluir QR Code:', error);
+    res.status(500).json({ message: 'Erro ao excluir QR Code', error });
+  }
+});
 
 // Rota para atualizar o pixKey e qrCodeUrl no Ecommerce
 router.put("/ecommerce/update-pix/:adminID", async (req, res) => {
