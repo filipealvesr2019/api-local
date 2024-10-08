@@ -155,6 +155,24 @@ router.get("/all-products", async (req, res) => {
   }
 });
 
+// Rota para excluir produto por ID
+router.delete('/product/:id', async (req, res) => {
+  const { id } = req.params;
 
+  try {
+    // Tenta encontrar e excluir o produto pelo ID
+    const deletedProduct = await Product.findByIdAndDelete(id);
+
+    if (!deletedProduct) {
+      return res.status(404).json({ message: 'Produto não encontrado' });
+    }
+
+    // Se excluído com sucesso
+    res.status(200).json({ message: 'Produto excluído com sucesso' });
+  } catch (error) {
+    // Lidar com erros
+    res.status(500).json({ message: 'Erro ao excluir produto', error });
+  }
+});
 
 module.exports = router;
