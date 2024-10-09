@@ -7,6 +7,8 @@ const Ecommerce = require('../models/Ecommerce');
 const Theme = require('../models/Theme');
 const QRCode = require('qrcode');
 const ObjectId = mongoose.Types.ObjectId; // Importando ObjectId
+const { CepAbertoAPI } = require('@brasil-interface/sdks');
+const cepAberto = new CepAbertoAPI(process.env.CEP_ABERTO_TOKEN); // Substitua por seu token
 
 let currentPort = 3001;
 
@@ -342,16 +344,25 @@ router.put('/update-pixkey/:adminID', async (req, res) => {
 
 
 
-// Rota para cadastrar o QR Code no banco de dados
+// // Rota para pesquisar CEPs pelo nome do bairro
+router.get('/cep', async (req, res) => {
+  const { cidade, estado, bairro } = req.body;
 
-// Rota para cadastrar o QR Code no banco de dados
-router.post('/ecommerce/admin/qrcode', async (req, res) => {
-  const { pixKey, adminID } = req.body;
+  try {
+    // Exemplo de chamada para buscar CEPs
+    const ceps = await cepAberto.getCepByAddress(cidade, estado, bairro);
+    console.log(ceps); // { cep: '05008-010', logradouro: 'Rua João Ramalho', complemento: 'até 999/1000', bairro: 'Perdizes', cidade: { ddd: '11', ibge: '3550308', nome: 'São Paulo' }, estado: { sigla: 'SP' }, altitude: 661.3333333333334, latitude: -23.537583, longitude: -46.680511 }
 
-  // Verificação dos dados recebidos
-  if (!pixKey || !adminID) {
-    return res.status(400).json({ error: "Pix Key and Admin ID are required" });
+ 
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro ao buscar CEPs.' });
   }
+});
+
+// Rota para cadastrar CEPs de um bairro
+router.post('/admin/post/cep', async (req, res) => {
+  const { cidade, estado, bairro, adminID } = req.body;
 
   // Verifica se o adminID é válido
   if (!ObjectId.isValid(adminID)) {
@@ -359,28 +370,45 @@ router.post('/ecommerce/admin/qrcode', async (req, res) => {
   }
 
   try {
-    // Gera o QR Code
-    const qrCodeUrl = await QRCode.toDataURL(pixKey);
+    // Busca os CEPs pelo nome do bairro, cidade e estado
+    const cepsResponse = await cepAberto.getCepByAddress(estado, cidade, '', bairro);
+    
+    if (!cepsResponse) {
+      return res.status(404).json({ message: "Nenhum CEP encontrado para o bairro fornecido." });
+    }
 
-    // Verifica se já existe um e-commerce com esse adminID
+    // Normaliza a resposta para sempre ser um array
+    const ceps = Array.isArray(cepsResponse) ? cepsResponse : [cepsResponse];
+
+    // Busca o e-commerce pelo adminID
     let ecommerce = await Ecommerce.findOne({ adminID });
 
     if (ecommerce) {
-      // Se já existir, atualiza o QR Code e a chave Pix
-      ecommerce.qrCodeUrl = qrCodeUrl;
-      ecommerce.pixKey = pixKey;
+      // Se o e-commerce já existe, atualiza o array de bairros
+      const bairroExistente = ecommerce.bairros.find(b => b.bairro === bairro && b.cidade === cidade && b.estado === estado);
+
+      if (bairroExistente) {
+        // Adiciona os novos CEPs ao bairro existente, sem duplicar
+        bairroExistente.ceps = [...new Set([...bairroExistente.ceps, ...ceps.map(c => c.cep)])];
+      } else {
+        // Adiciona um novo bairro se ele não existir
+        ecommerce.bairros.push({ cidade, estado, bairro});
+      }
     } else {
-      // Se não existir, cria um novo registro de e-commerce
-      ecommerce = new Ecommerce({ adminID, pixKey, qrCodeUrl });
+      // Se não existe e-commerce, cria um novo com o bairro e CEPs
+      ecommerce = new Ecommerce({
+        adminID,
+        bairros: [{ cidade, estado, bairro}]
+      });
     }
 
-    // Salva no banco de dados
+    // Salva ou atualiza o e-commerce no banco de dados
     await ecommerce.save();
 
-    res.status(201).json({ message: "QR Code successfully saved", qrCodeUrl });
+    res.status(201).json({ message: "CEPs cadastrados com sucesso.", bairros: ecommerce.bairros });
   } catch (error) {
-    console.error('Error generating QR code:', error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error('Erro ao cadastrar CEPs:', error);
+    res.status(500).json({ error: "Erro ao cadastrar CEPs." });
   }
 });
 

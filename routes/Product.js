@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Product = require('../models/products/product'); // Certifique-se de que o caminho para o modelo esteja correto
 const { default: mongoose } = require('mongoose');
+const { CepAbertoAPI } = require('@brasil-interface/sdks');
+const cepAberto = new CepAbertoAPI(process.env.CEP_ABERTO_TOKEN); // Substitua por seu token
 
 // Rota para cadastrar um produto
 router.post('/products', async (req, res) => {
@@ -175,4 +177,28 @@ router.delete('/product/:id', async (req, res) => {
   }
 });
 
+
+
+
+
+
+
+
+
+
+// Rota para pesquisar CEPs pelo nome do bairro
+router.get('/cep/:cep', async (req, res) => {
+  const { cep } = req.params;
+
+  try {
+    // Exemplo de chamada para buscar CEPs
+    const endereco = await cepAberto.getCepByNumber(cep);
+
+    console.log(endereco); 
+ 
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro ao buscar CEPs.' });
+  }
+});
 module.exports = router;

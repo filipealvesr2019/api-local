@@ -30,6 +30,12 @@ const EcommerceSchema = new mongoose.Schema({
 
 pixKey: { type: String, },
 qrCodeUrl: { type: String, },
+
+bairros: [{
+  cidade: String,
+  estado: String,
+  bairro: String,
+}]
 });
 
 module.exports = mongoose.model('Ecommerce', EcommerceSchema);
