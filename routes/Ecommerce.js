@@ -478,6 +478,109 @@ router.get('/admin/bairros/:adminID', async (req, res) => {
 });
 
 
+// Rota para salvar o horário de funcionamento
+router.post('/admin/horario-funcionamento', async (req, res) => {
+  const { adminID, abertura, fechamento } = req.body;
+
+  // Validações básicas
+  if (!adminID || !abertura || !fechamento) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+
+  try {
+    // Verifica se o adminID é válido
+    if (!mongoose.Types.ObjectId.isValid(adminID)) {
+      return res.status(400).json({ error: "Invalid admin ID" });
+    }
+
+    // Procura o ecommerce pelo adminID
+    let ecommerce = await Ecommerce.findOne({ adminID });
+
+    if (!ecommerce) {
+      return res.status(404).json({ message: "Ecommerce not found for the given admin ID" });
+    }
+
+    // Atualiza o horário de funcionamento
+    ecommerce.horarioFuncionamento = {
+      abertura: abertura,
+      fechamento: fechamento
+    };
+
+    // Salva as mudanças
+    await ecommerce.save();
+
+    res.status(200).json({ message: "Horário de funcionamento salvo com sucesso", horarioFuncionamento: ecommerce.horarioFuncionamento });
+  } catch (error) {
+    console.error('Error saving working hours:', error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
+
+
+
+// Rota para obter o horário de funcionamento pelo adminID
+router.get('/admin/horario-funcionamento/:adminID', async (req, res) => {
+  const { adminID } = req.params;
+
+  try {
+    // Verifica se o adminID é válido
+    if (!mongoose.Types.ObjectId.isValid(adminID)) {
+      return res.status(400).json({ error: "Invalid admin ID" });
+    }
+
+    // Procura o ecommerce pelo adminID
+    const ecommerce = await Ecommerce.findOne({ adminID });
+
+    if (!ecommerce) {
+      return res.status(404).json({ message: "Ecommerce not found for the given admin ID" });
+    }
+
+    // Retorna o horário de funcionamento
+    res.status(200).json({
+      horarioFuncionamento: ecommerce.horarioFuncionamento
+    });
+  } catch (error) {
+    console.error('Error fetching working hours:', error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
+
+
+
+
+// Rota para excluir o horário de funcionamento pelo adminID
+router.delete('/admin/horario-funcionamento/:adminID', async (req, res) => {
+  const { adminID } = req.params;
+
+  try {
+    // Verifica se o adminID é válido
+    if (!mongoose.Types.ObjectId.isValid(adminID)) {
+      return res.status(400).json({ error: "Invalid admin ID" });
+    }
+
+    // Procura o ecommerce pelo adminID
+    const ecommerce = await Ecommerce.findOne({ adminID });
+
+    if (!ecommerce) {
+      return res.status(404).json({ message: "Ecommerce not found for the given admin ID" });
+    }
+
+    // Remove o horário de funcionamento
+    await Ecommerce.updateOne({ adminID }, { $unset: { horarioFuncionamento: "" } });
+
+    // Salva as mudanças
+    await ecommerce.save();
+
+    res.status(200).json({ message: "Horário de funcionamento excluído com sucesso." });
+  } catch (error) {
+    console.error('Error deleting working hours:', error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 // Rota para buscar todos os detalhes da loja pelo adminID
 router.get('/loja/admin/:adminID', async (req, res) => {

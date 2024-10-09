@@ -35,7 +35,11 @@ bairros: [{
   cidade: String,
   estado: String,
   bairro: String,
-}]
+}],
+ horarioFuncionamento: {
+    abertura: { type: String, required: true }, // Exemplo: '08:00'
+    fechamento: { type: String, required: true } // Exemplo: '21:00'
+  }
 });
 
 module.exports = mongoose.model('Ecommerce', EcommerceSchema);
