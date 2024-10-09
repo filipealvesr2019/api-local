@@ -413,6 +413,69 @@ router.post('/admin/post/cep', async (req, res) => {
 });
 
 
+// Rota para deletar um bairro específico usando o _id do bairro
+router.delete('/admin/bairros/:adminID/:bairroID', async (req, res) => {
+  const { adminID, bairroID } = req.params;
+
+  // Verifica se o adminID e bairroID são válidos
+  if (!mongoose.Types.ObjectId.isValid(adminID) || !mongoose.Types.ObjectId.isValid(bairroID)) {
+    return res.status(400).json({ error: "Invalid admin ID or bairro ID" });
+  }
+
+  try {
+    // Busca o e-commerce pelo adminID
+    let ecommerce = await Ecommerce.findOne({ adminID });
+
+    if (!ecommerce) {
+      return res.status(404).json({ message: "Ecommerce not found for the given admin ID" });
+    }
+
+    // Verifica se o bairro existe
+    const bairroExistente = ecommerce.bairros.id(bairroID);
+    if (!bairroExistente) {
+      return res.status(404).json({ message: "Bairro not found" });
+    }
+
+    // Remove o bairro pelo _id usando o pull
+    ecommerce.bairros.pull({ _id: bairroID });
+
+    // Salva as mudanças no banco de dados
+    await ecommerce.save();
+
+    res.status(200).json({ message: "Bairro successfully deleted", bairros: ecommerce.bairros });
+  } catch (error) {
+    console.error('Error deleting bairro:', error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
+// Rota para buscar todos os bairros por adminID
+router.get('/admin/bairros/:adminID', async (req, res) => {
+  const { adminID } = req.params;
+
+  // Verifica se o adminID é válido
+  if (!mongoose.Types.ObjectId.isValid(adminID)) {
+    return res.status(400).json({ error: "Invalid admin ID" });
+  }
+
+  try {
+    // Busca o e-commerce pelo adminID
+    const ecommerce = await Ecommerce.findOne({ adminID });
+
+    if (!ecommerce) {
+      return res.status(404).json({ message: "Ecommerce not found for the given admin ID" });
+    }
+
+    // Extrai os bairros
+    const bairros = ecommerce.bairros;
+
+    res.status(200).json({ bairros });
+  } catch (error) {
+    console.error('Error fetching bairros:', error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 
 
