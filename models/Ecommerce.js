@@ -37,8 +37,8 @@ bairros: [{
   bairro: String,
 }],
  horarioFuncionamento: {
-    abertura: { type: String, required: true }, // Exemplo: '08:00'
-    fechamento: { type: String, required: true } // Exemplo: '21:00'
+    abertura: { type: String}, // Exemplo: '08:00'
+    fechamento: { type: String} // Exemplo: '21:00'
   }
 });
 

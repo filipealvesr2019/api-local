@@ -446,4 +446,20 @@ router.post("/user-reset-password/:token", resetPassword);
 
 router.post("/User", registerUser); // Use directly from AuthController
 
+// Rota para obter dados de um usuário por userID
+router.get('/userForm/:userID', async (req, res) => {
+  const { userID } = req.params;
+
+  try {
+    const user = await UserForm.findOne({ userID });
+    if (user) {
+      res.status(200).json(user);
+    } else {
+      res.status(404).json({ message: 'Usuário não encontrado.' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao buscar usuário.', error });
+  }
+});
+
 module.exports = router;

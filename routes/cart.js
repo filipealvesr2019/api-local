@@ -8,7 +8,7 @@ const FinancialTransaction = require("../models/Financial/FinancialTransaction")
 const router = express.Router();
 const { ObjectId } = require('mongoose').Types;
 
-router.post("/cart/:userID/:productId", async (req, res) => {
+router.post("/add-to-cart/:userID/:productId", async (req, res) => {
   try {
     const { userID, productId } = req.params;
     const { quantity,variations   } = req.body; // Array de variações
