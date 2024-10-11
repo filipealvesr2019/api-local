@@ -4,16 +4,15 @@ const Order = require("../../models/orders/Order"); // Ajuste o caminho conforme
 const Cart = require("../../models/cart/cart");
 const { default: mongoose } = require("mongoose");
 const FinancialTransaction = require("../../models/Financial/FinancialTransaction");
-
 router.post("/order", async (req, res) => {
   try {
-    const { userID, storeID, paymentMethod } = req.body;
+    const { userID, storeID, paymentMethod, items } = req.body; // Extraia items do corpo da requisição
 
-    // Encontre os itens do carrinho para o usuário
-    const cartItems = await Cart.find({ userID });
+    // Log para verificar o que está sendo recebido
 
-    // Mapeia os itens do carrinho para o formato esperado para o pedido
-    const items = cartItems.map((item) => {
+
+    // Mapeia os itens enviados na requisição
+    const orderItems = items.map((item) => {
       // Preço total do item considerando a quantidade
       let itemTotal = item.price * item.quantity;
 
@@ -27,16 +26,16 @@ router.post("/order", async (req, res) => {
       }
 
       return {
-        productID: item._id,
+        productID: item.productID,
         name: item.name,
         price: item.price,
-        quantity: item.quantity,
+        quantity: item.quantity, // Use a quantidade da requisição
         imageUrl: item.imageUrl, // Certifique-se de que imageUrl está sendo incluído
       };
     });
 
     // Calcula o total do pedido
-    const totalOrders = cartItems.reduce((acc, item) => {
+    const totalOrders = orderItems.reduce((acc, item) => {
       let itemTotal = item.price * item.quantity;
 
       // Se houver variações, soma o total das variações ao preço base (uma vez)
@@ -55,7 +54,7 @@ router.post("/order", async (req, res) => {
     const newOrder = new Order({
       userID,
       storeID,
-      items, // Definindo os itens no pedido
+      items: orderItems, // Definindo os itens no pedido
       status: "PENDING",
       purchaseDate: new Date(),
       paymentMethod,
@@ -76,6 +75,7 @@ router.post("/order", async (req, res) => {
       .json({ message: "Erro ao finalizar o pedido.", error: error.message });
   }
 });
+
 
 // Rota para buscar todas as vendas de um carrinho por storeID
 router.get("/admin/vendas/:storeID", async (req, res) => {
