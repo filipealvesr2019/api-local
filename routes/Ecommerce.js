@@ -478,44 +478,40 @@ router.get('/admin/bairros/:adminID', async (req, res) => {
 });
 
 
-// Rota para salvar o horário de funcionamento
+// Rota para salvar o horári// Rota para salvar o horário de funcionamento por dia da semana
 router.post('/admin/horario-funcionamento', async (req, res) => {
-  const { adminID, abertura, fechamento } = req.body;
+  const { adminID, horarios } = req.body;
 
   // Validações básicas
-  if (!adminID || !abertura || !fechamento) {
-    return res.status(400).json({ error: "All fields are required" });
+  if (!adminID || !horarios) {
+    return res.status(400).json({ error: "Todos os campos são obrigatórios" });
   }
 
   try {
     // Verifica se o adminID é válido
     if (!mongoose.Types.ObjectId.isValid(adminID)) {
-      return res.status(400).json({ error: "Invalid admin ID" });
+      return res.status(400).json({ error: "ID do administrador inválido" });
     }
 
     // Procura o ecommerce pelo adminID
     let ecommerce = await Ecommerce.findOne({ adminID });
 
     if (!ecommerce) {
-      return res.status(404).json({ message: "Ecommerce not found for the given admin ID" });
+      return res.status(404).json({ message: "Ecommerce não encontrado para o ID do administrador fornecido" });
     }
 
-    // Atualiza o horário de funcionamento
-    ecommerce.horarioFuncionamento = {
-      abertura: abertura,
-      fechamento: fechamento
-    };
+    // Atualiza os horários de funcionamento
+    ecommerce.horarioFuncionamento = horarios;
 
     // Salva as mudanças
     await ecommerce.save();
 
-    res.status(200).json({ message: "Horário de funcionamento salvo com sucesso", horarioFuncionamento: ecommerce.horarioFuncionamento });
+    res.status(200).json({ message: "Horários de funcionamento salvos com sucesso", horarioFuncionamento: ecommerce.horarioFuncionamento });
   } catch (error) {
-    console.error('Error saving working hours:', error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error('Erro ao salvar horários de funcionamento:', error);
+    res.status(500).json({ error: "Erro interno do servidor" });
   }
 });
-
 
 
 

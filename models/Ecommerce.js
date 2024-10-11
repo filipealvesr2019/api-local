@@ -36,10 +36,15 @@ bairros: [{
   estado: String,
   bairro: String,
 }],
- horarioFuncionamento: {
-    abertura: { type: String}, // Exemplo: '08:00'
-    fechamento: { type: String} // Exemplo: '21:00'
-  }
+horarioFuncionamento: {
+  segunda: { abertura: { type: String }, fechamento: { type: String } },
+  terca: { abertura: { type: String }, fechamento: { type: String } },
+  quarta: { abertura: { type: String }, fechamento: { type: String } },
+  quinta: { abertura: { type: String }, fechamento: { type: String } },
+  sexta: { abertura: { type: String }, fechamento: { type: String } },
+  sabado: { abertura: { type: String }, fechamento: { type: String } },
+  domingo: { abertura: { type: String }, fechamento: { type: String } },
+},
 });
 
 module.exports = mongoose.model('Ecommerce', EcommerceSchema);
