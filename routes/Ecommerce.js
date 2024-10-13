@@ -478,7 +478,7 @@ router.get('/admin/bairros/:adminID', async (req, res) => {
 });
 
 
-// Rota para salvar o horári// Rota para salvar o horário de funcionamento por dia da semana
+// Rota para salvar o horário de funcionamento por dia da semana
 router.post('/admin/horario-funcionamento', async (req, res) => {
   const { adminID, horarios } = req.body;
 
@@ -500,8 +500,15 @@ router.post('/admin/horario-funcionamento', async (req, res) => {
       return res.status(404).json({ message: "Ecommerce não encontrado para o ID do administrador fornecido" });
     }
 
-    // Atualiza os horários de funcionamento
-    ecommerce.horarioFuncionamento = horarios;
+    // Atualiza os horários de funcionamento e define isOpen como true
+    for (const dia in horarios) {
+      if (horarios.hasOwnProperty(dia)) {
+        ecommerce.horarioFuncionamento[dia] = {
+          ...horarios[dia],
+          isOpen: true,  // Define isOpen como true ao criar os horários
+        };
+      }
+    }
 
     // Salva as mudanças
     await ecommerce.save();
@@ -512,6 +519,7 @@ router.post('/admin/horario-funcionamento', async (req, res) => {
     res.status(500).json({ error: "Erro interno do servidor" });
   }
 });
+
 
 
 

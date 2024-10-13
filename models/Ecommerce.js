@@ -37,13 +37,13 @@ bairros: [{
   bairro: String,
 }],
 horarioFuncionamento: {
-  segunda: { abertura: { type: String }, fechamento: { type: String } },
-  terca: { abertura: { type: String }, fechamento: { type: String } },
-  quarta: { abertura: { type: String }, fechamento: { type: String } },
-  quinta: { abertura: { type: String }, fechamento: { type: String } },
-  sexta: { abertura: { type: String }, fechamento: { type: String } },
-  sabado: { abertura: { type: String }, fechamento: { type: String } },
-  domingo: { abertura: { type: String }, fechamento: { type: String } },
+  segunda: { abertura: { type: String }, fechamento: { type: String }, isOpen:{type: Boolean} },
+  terca: { abertura: { type: String }, fechamento: { type: String }, isOpen:{type: Boolean}  },
+  quarta: { abertura: { type: String }, fechamento: { type: String }, isOpen:{type: Boolean}  },
+  quinta: { abertura: { type: String }, fechamento: { type: String }, isOpen:{type: Boolean}  },
+  sexta: { abertura: { type: String }, fechamento: { type: String }, isOpen:{type: Boolean}  },
+  sabado: { abertura: { type: String }, fechamento: { type: String }, isOpen:{type: Boolean}  },
+  domingo: { abertura: { type: String }, fechamento: { type: String }, isOpen:{type: Boolean}  },
 },
 });
 
