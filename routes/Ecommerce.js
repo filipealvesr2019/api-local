@@ -586,6 +586,35 @@ router.delete('/admin/horario-funcionamento/:adminID', async (req, res) => {
   }
 });
 
+// Rota para atualizar o adminID e o horário de funcionamento
+router.put('/admin/horario-funcionamento/:adminID', async (req, res) => {
+  const { adminID, horarioFuncionamento } = req.body;
+
+  try {
+    const updatedEcommerce = await Ecommerce.findOneAndUpdate(
+      { adminID },  // Busca o ecommerce pelo adminID
+      {
+        $set: {
+          horarioFuncionamento,  // Atualiza os horários de funcionamento
+        },
+      },
+      { new: true } // Retorna o documento atualizado
+    );
+
+    if (!updatedEcommerce) {
+      return res.status(404).json({ message: 'Ecommerce não encontrado' });
+    }
+
+    res.status(200).json(updatedEcommerce);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao atualizar o ecommerce', error });
+  }
+});
+
+
+
+
 // Rota para buscar todos os detalhes da loja pelo adminID
 router.get('/loja/admin/:adminID', async (req, res) => {
   try {
