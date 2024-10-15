@@ -67,7 +67,15 @@ router.post("/order", async (req, res) => {
 
     // Salvar o pedido no banco de dados
     await newOrder.save();
-
+ 
+    // Verifique se o alarme está ativado para o storeID
+    const adminAlarm = await AdminAlarm.findOne({ storeID: storeID });
+    if (adminAlarm && adminAlarm.isAlarmActive) {
+      // Emitir som do alarme
+      console.log('Alarme soando!'); // Aqui você pode colocar a lógica para tocar o som, se necessário.
+      // Exemplo de código para tocar um som (em um ambiente de servidor, pode ser diferente)
+      // Você pode emitir um evento para o frontend ou enviar um WebSocket
+    }
     // Retornar uma resposta bem-sucedida
     return res
       .status(201)
@@ -233,31 +241,35 @@ router.get('/alarms/list/:adminID', async (req, res) => {
     res.status(500).json({ message: 'Erro ao listar os sons.', error: error.message });
   }
 });
-
-// Rota para salvar a escolha do alarme e ativar/desativar o alarme
 router.post('/alarms', async (req, res) => {
+
   try {
-    const { adminID, alarmSound, isAlarmActive } = req.body;
+    const { adminID, storeID, alarmSound, isAlarmActive } = req.body; // Garanta que storeID esteja aqui
 
     // Verificar se o admin já tem um alarme configurado
     let adminAlarm = await AdminAlarm.findOne({ adminID });
+
 
     if (adminAlarm) {
       // Se o admin já tem um alarme escolhido, atualize o alarme e o estado de ativação
       adminAlarm.alarmSound = alarmSound;
       adminAlarm.isAlarmActive = isAlarmActive;
+      adminAlarm.storeID = storeID; // Adicione esta linha para atualizar o storeID
       await adminAlarm.save();
     } else {
       // Se não, crie um novo registro com a escolha do alarme e o estado de ativação
-      adminAlarm = new AdminAlarm({ adminID, alarmSound, isAlarmActive });
+      adminAlarm = new AdminAlarm({ adminID, alarmSound, isAlarmActive, storeID });
       await adminAlarm.save();
     }
 
     res.status(200).json({ message: 'Alarme salvo com sucesso!', alarm: adminAlarm });
   } catch (error) {
+    console.error("Erro ao salvar o alarme:", error); // Log do erro
     res.status(500).json({ message: 'Erro ao salvar o alarme.', error: error.message });
   }
 });
+
+
 
 
 
@@ -276,7 +288,7 @@ router.get('/audio/play/:filename', (req, res) => {
 });
 router.post('/alarms/select', async (req, res) => {
   try {
-    const { adminID, alarmSound } = req.body;
+    const { adminID, alarmSound, storeID } = req.body;
 
     // Verificar se o admin já tem um alarme configurado
     let adminAlarm = await AdminAlarm.findOne({ adminID });
@@ -292,6 +304,7 @@ router.post('/alarms/select', async (req, res) => {
         adminID,
         alarmSound,
         isAlarmActive: false, // Inicializa como falso
+        storeID
       });
       await adminAlarm.save();
     }

@@ -6,6 +6,12 @@ const AdminAlarmSchema = new mongoose.Schema({
     ref: 'Admin', // Referência ao admin que escolheu o alarme
     required: true,
   },
+  storeID: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Ecommerce', // Referência ao admin que escolheu o alarme
+    required: true,
+  },
+  
   alarmSound: {
     type: String, // URL ou nome do arquivo do som do alarme
     required: true,
