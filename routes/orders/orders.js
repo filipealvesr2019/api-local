@@ -4,6 +4,9 @@ const Order = require("../../models/orders/Order"); // Ajuste o caminho conforme
 const Cart = require("../../models/cart/cart");
 const { default: mongoose } = require("mongoose");
 const FinancialTransaction = require("../../models/Financial/FinancialTransaction");
+const AdminAlarm = require("../../models/AdminAlarm/AdminAlarm");
+const fs = require('fs');
+const path = require('path');
 router.post("/order", async (req, res) => {
   try {
     const { userID, storeID, paymentMethod, items } = req.body; // Extraia items do corpo da requisição
@@ -192,4 +195,82 @@ router.put("/compras/:orderId/status", async (req, res) => {
   }
 });
 
+
+
+
+// Rota para listar os sons na pasta 'public/alarms' e destacar o som escolhido pelo adminID
+router.get('/alarms/list/:adminID', async (req, res) => {
+  const { adminID } = req.params;
+  
+  try {
+    // Ajustar o caminho para a pasta 'public/alarms'
+    const alarmsDirectory = path.join(__dirname, '../../public/alarms');
+
+    // Ler os arquivos da pasta de alarmes
+    fs.readdir(alarmsDirectory, async (err, files) => {
+      if (err) {
+        return res.status(500).json({ message: 'Erro ao listar os sons.', error: err.message });
+      }
+
+      // Filtrar apenas os arquivos de som (ex.: .mp3, .wav)
+      const soundFiles = files.filter(file => file.endsWith('.mp3') || file.endsWith('.wav'));
+
+      // Buscar o alarme configurado pelo adminID
+      const adminAlarm = await AdminAlarm.findOne({ adminID });
+
+      // Se o admin tem um alarme configurado, destaque-o
+      const selectedAlarm = adminAlarm ? adminAlarm.alarmSound : null;
+
+      // Retornar a lista de arquivos de som e o som selecionado pelo admin
+      res.status(200).json({
+        sounds: soundFiles,
+        selectedAlarm,  // Som selecionado pelo admin
+        isAlarmActive: adminAlarm ? adminAlarm.isAlarmActive : false // Estado de ativação
+      });
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao listar os sons.', error: error.message });
+  }
+});
+
+// Rota para salvar a escolha do alarme e ativar/desativar o alarme
+router.post('/alarms', async (req, res) => {
+  try {
+    const { adminID, alarmSound, isAlarmActive } = req.body;
+
+    // Verificar se o admin já tem um alarme configurado
+    let adminAlarm = await AdminAlarm.findOne({ adminID });
+
+    if (adminAlarm) {
+      // Se o admin já tem um alarme escolhido, atualize o alarme e o estado de ativação
+      adminAlarm.alarmSound = alarmSound;
+      adminAlarm.isAlarmActive = isAlarmActive;
+      await adminAlarm.save();
+    } else {
+      // Se não, crie um novo registro com a escolha do alarme e o estado de ativação
+      adminAlarm = new AdminAlarm({ adminID, alarmSound, isAlarmActive });
+      await adminAlarm.save();
+    }
+
+    res.status(200).json({ message: 'Alarme salvo com sucesso!', alarm: adminAlarm });
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao salvar o alarme.', error: error.message });
+  }
+});
+
+
+
+// Rota para tocar um som específico
+router.get('/audio/play/:filename', (req, res) => {
+  const { filename } = req.params;
+  const filePath = path.join(__dirname, '../../public/alarms', filename);
+
+  // Verificar se o arquivo existe
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ message: 'Arquivo não encontrado.' });
+  }
+
+  // Enviar o arquivo de áudio como resposta
+  res.sendFile(filePath);
+});
 module.exports = router;

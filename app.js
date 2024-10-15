@@ -8,7 +8,8 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 const dotenv = require('dotenv');
-
+const http = require('http');
+const socketIo = require('socket.io');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const admin = require('./routes/admin');
@@ -42,7 +43,24 @@ app.use(cookieParser());
 app.use(cors({ origin: "*"}));
 
 
+const server = http.createServer(app);
+const io = socketIo(server, {
+  cors: {
+    origin: "*", // Defina a origem permitida
+    methods: ["GET", "POST"]
+  }
+});
 
+// Conexão de WebSocket
+io.on('connection', (socket) => {
+  console.log('Novo cliente conectado');
+
+  // Evento para tocar o alarme
+  socket.on('disconnect', () => {
+    console.log('Cliente desconectado');
+  });
+});
+app.use('/alarms', express.static('public/alarms'));
 
 
 // Use the strict middleware that raises an error when unauthenticated
