@@ -302,5 +302,28 @@ router.post('/alarms/select', async (req, res) => {
   }
 });
 
+router.post('/alarms/toggle', async (req, res) => {
+  try {
+    const { adminID } = req.body;
+
+    // Encontrar o alarme do admin
+    let adminAlarm = await AdminAlarm.findOne({ adminID });
+
+    if (!adminAlarm) {
+      return res.status(404).json({ message: 'Alarme não encontrado.' });
+    }
+
+    // Alternar o estado do alarme
+    adminAlarm.isAlarmActive = !adminAlarm.isAlarmActive;
+    await adminAlarm.save();
+
+    res.status(200).json({
+      message: 'Estado do alarme alterado com sucesso!',
+      isAlarmActive: adminAlarm.isAlarmActive,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao alternar estado do alarme.', error: error.message });
+  }
+});
 
 module.exports = router;
