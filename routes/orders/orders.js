@@ -274,9 +274,6 @@ router.get('/audio/play/:filename', (req, res) => {
   // Enviar o arquivo de áudio como resposta
   res.sendFile(filePath);
 });
-
-
-// Rota para selecionar um alarme como alarme inicial
 router.post('/alarms/select', async (req, res) => {
   try {
     const { adminID, alarmSound } = req.body;
@@ -287,10 +284,15 @@ router.post('/alarms/select', async (req, res) => {
     if (adminAlarm) {
       // Atualizar o alarme selecionado
       adminAlarm.alarmSound = alarmSound;
+      // O isAlarmActive não está sendo alterado aqui, então permanece o mesmo
       await adminAlarm.save();
     } else {
-      // Se não, crie um novo registro com a escolha do alarme
-      adminAlarm = new AdminAlarm({ adminID, alarmSound, isAlarmActive: false });
+      // Se não, crie um novo registro com a escolha do alarme e isAlarmActive como falso
+      adminAlarm = new AdminAlarm({
+        adminID,
+        alarmSound,
+        isAlarmActive: false, // Inicializa como falso
+      });
       await adminAlarm.save();
     }
 
@@ -299,5 +301,6 @@ router.post('/alarms/select', async (req, res) => {
     res.status(500).json({ message: 'Erro ao selecionar o alarme.', error: error.message });
   }
 });
+
 
 module.exports = router;
