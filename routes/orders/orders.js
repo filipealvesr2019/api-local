@@ -7,6 +7,7 @@ const FinancialTransaction = require("../../models/Financial/FinancialTransactio
 const AdminAlarm = require("../../models/AdminAlarm/AdminAlarm");
 const fs = require('fs');
 const path = require('path');
+
 router.post("/order", async (req, res) => {
   try {
     const { userID, storeID, paymentMethod, items } = req.body; // Extraia items do corpo da requisição

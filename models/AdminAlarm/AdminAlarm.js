@@ -12,7 +12,7 @@ const AdminAlarmSchema = new mongoose.Schema({
   },
   isAlarmActive: {
     type: Boolean, // Valor booleano para ativar ou desativar o alarme
-    default: true, // Por padrão, o alarme estará ativado
+    default: false, // Por padrão, o alarme estará ativado
   },
 });
 
