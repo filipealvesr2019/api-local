@@ -1,48 +1,50 @@
 const express = require("express");
-const http = require('http');
-const socketIo = require('socket.io');
-const mongoose = require('mongoose');
-const Chat = require("../../models/chat/chat");
-const { default: axios } = require("axios");
-const { Message } = require("postmark");
+const Chat = require('../../models/chat/chat')
 
-const app = express();
-const server = http.createServer(app);
-const io = socketIo(server);
 
 const router = express.Router();
 
 
+// Rota para salvar uma nova mensagem
+router.post('/messages', async (req, res) => {
+  const { from, message, storeID, userID } = req.body;
 
+  if (!from || !message || !storeID || !userID) {
+    return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
+  }
 
+  const newMessage = new Chat({ from, message, storeID, userID });
 
-
-// Escutar eventos de conexão Socket.IO
-io.on('connection', (socket) => {
-    console.log('Usuário conectado:', socket.id);
-  
-    // Evento para enviar mensagem
-    socket.on('sendMessage', async (data) => {
-      const { from, to, message } = data;
-  
-      // Salvar mensagem no banco de dados
-      const newMessage = new Chat({ from, to, message });
-      await newMessage.save();
-  
-      // Emitir a mensagem para o destinatário
-      io.emit('receiveMessage', data);
-    });
-  
-    // Evento de desconexão
-    socket.on('disconnect', () => {
-      console.log('Usuário desconectado:', socket.id);
-    });
-  });
-
-
-
+  try {
+    const savedMessage = await newMessage.save();
+    res.status(201).json(savedMessage);
+  } catch (error) {
+    console.error('Erro ao salvar a mensagem:', error);
+    res.status(500).json({ message: 'Erro ao salvar a mensagem.' });
+  }
+});
 
   
+router.get('/messages/:storeID', async (req, res) => {
+  const { storeID } = req.params; // Obter o storeID dos parâmetros da URL
+  
+  try {
+    const messages = await Chat.find({ storeID }).sort({ createdAt: 1 });
+    res.json(messages);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
+// Rota para buscar mensagens por userID e storeID
+router.get('/messages/:storeID/user/:userID', async (req, res) => {
+  const { storeID, userID } = req.params;
 
+  try {
+    const messages = await Chat.find({ storeID, userID }).sort({ createdAt: 1 });
+    res.json(messages);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 module.exports = router;

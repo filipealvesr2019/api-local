@@ -30,6 +30,7 @@ const MetaAPI = require('./routes/Meta API/whatsapp');
 const cronJobs = require('./routes/cronJobs');
 const ordersRouter = require("./routes/orders/orders"); // Ajuste o caminho conforme necessário
 const QRCodePIX = require("./routes/QRCodePIX/QRCodePIX"); // Ajuste o caminho conforme necessário
+const Chat = require("./routes/chat/Chat"); // Ajuste o caminho conforme necessário
 
 
 
@@ -59,6 +60,13 @@ const io = new Server(server, {
 
 io.on('connection', (socket) => {
   console.log('a user connected');
+
+  // Ouve quando um cliente envia uma mensagem
+  socket.on('clientMessage', (message) => {
+    console.log('Mensagem do cliente:', message);
+    // Envia a mensagem para o admin
+    io.emit('adminMessage', message); // Emitir para todos admins conectados
+  });
   socket.on('disconnect', () => {
     console.log('user disconnected');
   });
@@ -91,12 +99,11 @@ app.use('/api', superAdmin);
 app.use('/api', admin);
 app.use('/api', Ecommerce);
 app.use('/api', Customer);
-
+app.use('/api', Chat);
 
 
 
 app.use('/api', Monthly);
-
 app.use('/api', Product);
 app.use('/api', User);
 app.use('/api', cart);
