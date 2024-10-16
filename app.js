@@ -8,6 +8,9 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 const dotenv = require('dotenv');
+const { createServer } = require ("node:http");
+const { Server } = require('socket.io');
+
 
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
@@ -43,7 +46,23 @@ app.use(cors({ origin: "*"}));
 
 // Create HTTP server
 
+const server = createServer(app)
 
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5002", // Permita a origem específica ou use "*" para todas as origens
+    methods: ["GET", "POST"], // Especifique os métodos permitidos
+    credentials: true // Permita credenciais, se necessário
+  }
+});
+
+
+io.on('connection', (socket) => {
+  console.log('a user connected');
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
+});
 app.use('/alarms', express.static('public/alarms'));
 
 
@@ -121,6 +140,7 @@ mongoose.connect(uri, options).then(() => {
   console.error('Erro de conexão com o banco de dados:', error);
 });
 
-app.listen(port, () => {
+
+server.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });
