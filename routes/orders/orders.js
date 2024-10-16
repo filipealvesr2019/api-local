@@ -7,7 +7,6 @@ const FinancialTransaction = require("../../models/Financial/FinancialTransactio
 const AdminAlarm = require("../../models/AdminAlarm/AdminAlarm");
 const fs = require('fs');
 const path = require('path');
-const io = require('../../socket/socket');
 
 router.post("/order", async (req, res) => {
   try {
@@ -72,9 +71,10 @@ router.post("/order", async (req, res) => {
     // Verifique se o alarme está ativado para o storeID
     const adminAlarm = await AdminAlarm.findOne({ storeID: storeID });
     if (adminAlarm && adminAlarm.isAlarmActive) {
-            // Emitir um evento WebSocket para tocar o alarme no frontend
-            io.emit('alarmSound', { message: 'Alarme soando!', alarmSound: adminAlarm.alarmSound });
-            console.log('Alarme soando para a loja:', storeID);
+           // Emitir um evento WebSocket para tocar o alarme no frontend
+      req.io.emit('alarmSound', { message: 'Alarme soando!', alarmSound: adminAlarm.alarmSound });
+      console.log('Alarme soando para a loja:', storeID);
+
       
     }
     // Retornar uma resposta bem-sucedida

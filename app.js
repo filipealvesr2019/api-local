@@ -63,6 +63,11 @@ io.on('connection', (socket) => {
     console.log('user disconnected');
   });
 });
+// Middleware para fazer o 'io' estar disponível nas rotas
+app.use((req, res, next) => {
+  req.io = io; // Disponibilizar o 'io' nas requisições
+  next();
+});
 app.use('/alarms', express.static('public/alarms'));
 
 
