@@ -7,6 +7,7 @@ const FinancialTransaction = require("../../models/Financial/FinancialTransactio
 const AdminAlarm = require("../../models/AdminAlarm/AdminAlarm");
 const fs = require('fs');
 const path = require('path');
+const io = require('../../socket/socket');
 
 router.post("/order", async (req, res) => {
   try {
@@ -71,10 +72,10 @@ router.post("/order", async (req, res) => {
     // Verifique se o alarme está ativado para o storeID
     const adminAlarm = await AdminAlarm.findOne({ storeID: storeID });
     if (adminAlarm && adminAlarm.isAlarmActive) {
-      // Emitir som do alarme
-      console.log('Alarme soando!'); // Aqui você pode colocar a lógica para tocar o som, se necessário.
-      // Exemplo de código para tocar um som (em um ambiente de servidor, pode ser diferente)
-      // Você pode emitir um evento para o frontend ou enviar um WebSocket
+            // Emitir um evento WebSocket para tocar o alarme no frontend
+            io.emit('alarmSound', { message: 'Alarme soando!', alarmSound: adminAlarm.alarmSound });
+            console.log('Alarme soando para a loja:', storeID);
+      
     }
     // Retornar uma resposta bem-sucedida
     return res
@@ -336,6 +337,27 @@ router.post('/alarms/toggle', async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: 'Erro ao alternar estado do alarme.', error: error.message });
+  }
+});
+
+
+// Rota para obter o alarme por adminID
+router.get("/alarm/:adminID", async (req, res) => {
+  try {
+    const { adminID } = req.params;
+
+    // Busca o alarme no banco de dados pelo adminID
+    const alarm = await AdminAlarm.findOne({ adminID: adminID });
+
+    if (!alarm) {
+      return res.status(404).json({ message: "Alarme não encontrado." });
+    }
+
+    // Retorna as informações do alarme
+    return res.status(200).json(alarm);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Erro ao buscar o alarme.", error: error.message });
   }
 });
 
