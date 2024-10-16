@@ -8,8 +8,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 const dotenv = require('dotenv');
-const http = require('http');
-const io = require('./socket/socket'); // Importe o arquivo socket.js
+
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const admin = require('./routes/admin');
