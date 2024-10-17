@@ -4,6 +4,12 @@ const jwt = require('jsonwebtoken');
 const { isEmail } = require("validator");
 
 const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, "Digite um nome válido!"],
+    lowercase: true,
+    unique:true,
+  },
   email: {
     type: String,
     required: [true, "Digite um email válido!"],
