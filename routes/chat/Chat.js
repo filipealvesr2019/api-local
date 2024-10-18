@@ -26,11 +26,34 @@ router.post('/messages', async (req, res) => {
 
   
 router.get('/messages/:storeID', async (req, res) => {
-  const { storeID } = req.params; // Obter o storeID dos parâmetros da URL
-  
+  const { storeID } = req.params;
+
   try {
+    // Buscar todas as mensagens do storeID
     const messages = await Chat.find({ storeID }).sort({ createdAt: 1 });
-    res.json(messages);
+
+    // Agrupar mensagens e suas respostas
+    const groupedMessages = messages.reduce((acc, message) => {
+      // Verifica se a mensagem tem uma mensagem que está respondendo
+      if (message.replyTo) {
+        // Encontra a mensagem à qual esta mensagem está respondendo
+        const parentMessage = acc.find(msg => msg._id.toString() === message.replyTo.toString());
+
+        if (parentMessage) {
+          // Adiciona a mensagem como uma resposta
+          if (!parentMessage.replies) {
+            parentMessage.replies = [];
+          }
+          parentMessage.replies.push(message);
+        }
+      } else {
+        // Se não houver resposta, adiciona como mensagem de nível superior
+        acc.push({ ...message.toObject(), replies: [] });
+      }
+      return acc;
+    }, []);
+
+    res.json(groupedMessages);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -47,4 +70,30 @@ router.get('/messages/:storeID/user/:userID', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
+router.post('/messages/reply', async (req, res) => {
+  const { from, message, storeID, userID, replyTo } = req.body;
+
+  if (!from || !message || !storeID || !userID) {
+    return res.status(400).json({ message: 'Todos os campos são obrigatórios' });
+  }
+
+  const newMessage = new Chat({
+    from,
+    message,
+    storeID,
+    userID,
+    replyTo, // deve conter o ID da mensagem original
+  });
+
+  try {
+    await newMessage.save();
+    res.status(201).json(newMessage);
+  } catch (error) {
+    console.error('Erro ao salvar a mensagem:', error);
+    res.status(500).json({ message: 'Erro ao salvar a mensagem' });
+  }
+});
+
+
 module.exports = router;

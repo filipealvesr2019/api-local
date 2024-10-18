@@ -11,9 +11,9 @@ const chatSchema = new mongoose.Schema({
     ref: "Ecommerce",
     required: true,
   },
-
   from: String,
   message: String,
+  replyTo: { type: mongoose.Schema.Types.ObjectId, ref: 'Chat', default: null }, // Campo para vincular respostas
   createdAt: { type: Date, default: Date.now }, // Data de envio
 });
 
