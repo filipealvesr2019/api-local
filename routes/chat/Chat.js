@@ -96,4 +96,22 @@ router.post('/messages/reply', async (req, res) => {
 });
 
 
+router.patch('/messages/read/:userID/:storeID', async (req, res) => {
+  const { userID, storeID } = req.params;
+
+  try {
+    // Atualiza as mensagens como lidas
+    await Chat.updateMany({ userID, storeID, read: false }, { read: true });
+
+    // Conta as mensagens não lidas
+    const unreadCount = await Chat.countDocuments({ userID, storeID, read: false });
+
+    res.status(200).json({ unreadCount });
+  } catch (error) {
+    console.error('Erro ao atualizar mensagens:', error);
+    res.status(500).json({ message: 'Erro ao atualizar mensagens.' });
+  }
+});
+
+
 module.exports = router;

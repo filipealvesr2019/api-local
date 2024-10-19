@@ -15,6 +15,8 @@ const chatSchema = new mongoose.Schema({
   message: String,
   replyTo: { type: mongoose.Schema.Types.ObjectId, ref: 'Chat', default: null }, // Campo para vincular respostas
   createdAt: { type: Date, default: Date.now }, // Data de envio
+  read: { type: Boolean, default: false } // Campo para verificar se a mensagem foi lida
+
 });
 
 const Chat = mongoose.model("Chat", chatSchema);
