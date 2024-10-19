@@ -56,27 +56,25 @@ const io = new Server(server, {
     credentials: true // Permita credenciais, se necessário
   }
 });
-
 io.on("connection", (socket) => {
   console.log("A user connected");
 
-  // Escutar mensagem do cliente
   socket.on("clientMessage", (data) => {
-    // Enviar a mensagem para todos os clientes, incluindo admin
-    io.emit("clientMessage", {
-      from: data.from,
-      message: data.message,
-    });
+      console.log("Mensagem recebida do cliente:", data);
+      io.emit("clientMessage", {
+          from: data.from,
+          message: data.message,
+      });
   });
 
   socket.on("sendAdminMessage", (adminMessage) => {
-    io.emit("adminMessage", {
-      message: adminMessage,
-    });
+      io.emit("adminMessage", {
+          message: adminMessage,
+      });
   });
 
   socket.on("disconnect", () => {
-    console.log("A user disconnected");
+      console.log("A user disconnected");
   });
 });
 
