@@ -57,20 +57,29 @@ const io = new Server(server, {
   }
 });
 
+io.on("connection", (socket) => {
+  console.log("A user connected");
 
-io.on('connection', (socket) => {
-  console.log('a user connected');
-
-  // Ouve quando um cliente envia uma mensagem
-  socket.on('clientMessage', (message) => {
-    console.log('Mensagem do cliente:', message);
-    // Envia a mensagem para o admin
-    io.emit('adminMessage', message); // Emitir para todos admins conectados
+  // Escutar mensagem do cliente
+  socket.on("clientMessage", (data) => {
+    // Enviar a mensagem para todos os clientes, incluindo admin
+    io.emit("clientMessage", {
+      from: data.from,
+      message: data.message,
+    });
   });
-  socket.on('disconnect', () => {
-    console.log('user disconnected');
+
+  socket.on("sendAdminMessage", (adminMessage) => {
+    io.emit("adminMessage", {
+      message: adminMessage,
+    });
+  });
+
+  socket.on("disconnect", () => {
+    console.log("A user disconnected");
   });
 });
+
 // Middleware para fazer o 'io' estar disponível nas rotas
 app.use((req, res, next) => {
   req.io = io; // Disponibilizar o 'io' nas requisições
