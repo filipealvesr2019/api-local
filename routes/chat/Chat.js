@@ -7,13 +7,13 @@ const router = express.Router();
 
 // Rota para salvar uma nova mensagem
 router.post('/messages', async (req, res) => {
-  const { from, message, storeID, userID } = req.body;
+  const {attendant,  from, message, storeID, userID } = req.body;
 
   if (!from || !message || !storeID || !userID) {
     return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
   }
 
-  const newMessage = new Chat({ from, message, storeID, userID });
+  const newMessage = new Chat({attendant, from, message, storeID, userID });
 
   try {
     const savedMessage = await newMessage.save();

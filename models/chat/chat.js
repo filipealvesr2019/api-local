@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const chatSchema = new mongoose.Schema({
+  attendant: String,
   userID: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "UserForm",
