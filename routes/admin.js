@@ -411,4 +411,53 @@ router.get('/qr-code/:adminID', async (req, res) => {
   }
 });
 
+
+// Rota para buscar todos os atendentes por adminID
+router.get("/atendentes/:adminID", async (req, res) => {
+  try {
+    const { adminID } = req.params;
+
+    // Busca todos os atendentes vinculados ao adminID e com role 'atendente'
+    const atendentes = await Admin.find({ adminID, role: "atendente" });
+
+    if (atendentes.length === 0) {
+      return res.status(404).json({ success: false, message: "Nenhum atendente encontrado para este adminID." });
+    }
+
+    res.status(200).json({ success: true, atendentes });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Rota para adicionar um atendente com adminID
+router.post("/add-atendente", async (req, res) => {
+  try {
+    const { adminID, name,  cpfCnpj,  email, password, components } = req.body;
+
+    // Verifica se o adminID é válido (existe um admin com esse ID)
+    const admin = await Admin.findById(adminID);
+    if (!admin) {
+      return res.status(404).json({ success: false, message: "Admin não encontrado!" });
+    }
+
+    // Criação de um novo atendente vinculado ao adminID
+    const atendente = new Admin({
+      adminID,  // Relaciona o atendente ao administrador
+      name,
+      cpfCnpj,
+      email,
+      password,
+      role: "atendente", // Define automaticamente como atendente
+      components, // Lista de componentes associados ao atendente
+    });
+
+    // Salva o atendente no banco de dados
+    await atendente.save();
+
+    res.status(201).json({ success: true, message: "Atendente cadastrado com sucesso!" });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
 module.exports = router;
